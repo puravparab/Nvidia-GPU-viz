@@ -95,7 +95,7 @@ export const INFO = {
   },
   manifold: {
     tag: 'Cooling', name: 'Liquid Cooling Manifold',
-    blurb: 'Vertical supply and return manifolds distribute warm-water coolant to every tray through blind-mate quick-disconnects. Liquid cooling removes heat 1,000× more efficiently than air and lets 120 kW live in a single rack; coolant enters around 25 °C and leaves around 45 °C.',
+    blurb: 'Vertical supply and return manifolds distribute warm-water coolant to every tray through blind-mate quick-disconnects. Liquid moves heat far more efficiently than air, which is what lets 120 kW live in a single rack; coolant enters around 25 °C and leaves around 45 °C.',
     specs: [
       ['Type', 'Direct-to-chip, warm water'],
       ['Supply / return', '~25 °C in, ~45 °C out'],
@@ -109,7 +109,7 @@ export const INFO = {
     specs: [
       ['Standard', 'NVIDIA MGX / OCP'],
       ['Weight loaded', '~1,360 kg (3,000 lb)'],
-      ['Components', '1.2M+ parts per rack'],
+      ['Components', '~600,000 parts per rack'],
     ],
   },
 
@@ -220,12 +220,12 @@ export const INFO = {
   },
   lpddr: {
     tag: 'Memory', name: 'LPDDR5X Memory',
-    blurb: 'Sixteen LPDDR5X packages surround the Grace die — 480 GB of ECC memory drawing a fifth of the power of an equivalent DDR5 DIMM setup. This is the “capacity tier”: huge models spill from GPU HBM into this pool over NVLink-C2C.',
+    blurb: 'A ring of LPDDR5X packages surrounds the Grace die — 480 GB of ECC memory at a fraction of the power an equivalent DDR5 DIMM setup would draw. This is the “capacity tier”: huge models spill from GPU HBM into this pool over NVLink-C2C.',
     specs: [
       ['Capacity', '480 GB per Grace'],
       ['Bandwidth', 'Up to 512 GB/s'],
       ['Type', 'LPDDR5X with ECC'],
-      ['Efficiency', '~5× less power than DDR5'],
+      ['Efficiency', '~1/8 the power per byte of DDR5'],
     ],
   },
   b200Package: {
@@ -299,7 +299,7 @@ export const INFO = {
   },
   hbmStack: {
     tag: 'Memory', name: 'HBM3e Stack',
-    blurb: 'Each of the eight towers is a stack of eight DRAM dies, thinned to ~30 µm and connected vertically by thousands of through-silicon vias. One stack moves ~1 TB/s — all eight together give the GPU its 8 TB/s of memory bandwidth.',
+    blurb: 'Each of the eight towers is a stack of eight DRAM dies, thinned to tens of microns and connected vertically by thousands of through-silicon vias. One stack moves ~1 TB/s — all eight together give the GPU its 8 TB/s of memory bandwidth.',
     specs: [
       ['Capacity', '24 GB per stack (8-high)'],
       ['Bandwidth', '~1 TB/s per stack'],
@@ -308,12 +308,12 @@ export const INFO = {
     ],
   },
   interposer: {
-    tag: 'Packaging', name: 'CoWoS Silicon Interposer',
-    blurb: 'Beneath the dies lies a slab of silicon etched with tens of thousands of micro-wires — TSMC’s CoWoS-L packaging. It is the only way to wire 8 HBM stacks to the GPU with the density HBM requires; an organic PCB could never route this many connections.',
+    tag: 'Packaging', name: 'CoWoS-L Interposer',
+    blurb: 'Beneath the dies lies TSMC’s CoWoS-L packaging: an interposer with embedded local silicon bridges carrying tens of thousands of micro-wires. It is the only way to wire 8 HBM stacks to the GPU with the density HBM requires; an ordinary PCB could never route this many connections.',
     specs: [
       ['Technology', 'TSMC CoWoS-L'],
       ['Role', 'Die ↔ HBM micro-routing'],
-      ['Wires', 'Tens of thousands of traces'],
+      ['Design', 'Silicon bridges in an RDL interposer'],
     ],
   },
   substrate: {
