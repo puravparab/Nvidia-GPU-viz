@@ -35,6 +35,23 @@ npx serve .
 then open http://localhost:8000. (A server is required because the app uses ES modules;
 opening `index.html` directly from disk will not work.)
 
+## Deploying (Cloudflare Pages)
+
+The site is fully static with no build step, so deployment is trivial.
+
+**Option A — Git integration (auto-deploys on every push):**
+1. Cloudflare dashboard → Workers & Pages → Create → Pages → *Connect to Git* → pick this repo
+2. Framework preset: **None** · Build command: *(empty)* · Build output directory: `/`
+3. Set the production branch (Settings → Builds & deployments) to whichever branch you ship from
+
+**Option B — one-off upload from your machine:**
+```sh
+npx wrangler login          # or set CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID
+npx wrangler pages deploy   # project name & output dir come from wrangler.jsonc
+```
+
+`wrangler.jsonc` and `_headers` (long-lived caching for the vendored Three.js) are already set up.
+
 ## Accuracy
 
 Geometry and specs are modeled after public NVIDIA documentation and teardowns of the

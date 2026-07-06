@@ -1,0 +1,4 @@
+# Cloudflare Pages headers: the vendored Three.js build never changes,
+# so let browsers cache it for a year.
+/vendor/*
+  Cache-Control: public, max-age=31536000, immutable
