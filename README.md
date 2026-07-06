@@ -43,6 +43,10 @@ GB200 NVL72 / DGX GB200: 72 Blackwell GPUs + 36 Grace CPUs in one NVLink domain,
 copper spine, and eight 33 kW power shelves feeding a 48 V DC busbar. It is an
 illustrative model, not CAD data.
 
+## Credits
+
+Built by [@notpurav](https://twitter.com/notpurav) with Claude Fable.
+
 ## Structure
 
 ```

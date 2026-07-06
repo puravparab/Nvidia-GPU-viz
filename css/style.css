@@ -199,6 +199,31 @@ html, body {
 }
 #hint b { color: var(--text); font-weight: 600; }
 
+/* ---------- credit ---------- */
+#credit {
+  position: fixed;
+  bottom: 18px;
+  left: 26px;
+  z-index: 10;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  background: var(--panel);
+  border: 1px solid rgba(255,255,255,0.07);
+  border-radius: 999px;
+  padding: 8px 16px;
+  backdrop-filter: blur(8px);
+}
+#credit a {
+  color: var(--green);
+  font-weight: 600;
+  text-decoration: none;
+}
+#credit a:hover { text-decoration: underline; }
+.credit-sep { margin: 0 5px; color: #3a4147; }
+@media (max-width: 900px) {
+  #credit { display: none; }
+}
+
 /* ---------- guided tour ---------- */
 #tour-btn {
   position: fixed;
