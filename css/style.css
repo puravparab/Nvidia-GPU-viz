@@ -199,6 +199,97 @@ html, body {
 }
 #hint b { color: var(--text); font-weight: 600; }
 
+/* ---------- guided tour ---------- */
+#tour-btn {
+  position: fixed;
+  bottom: 18px;
+  right: 26px;
+  z-index: 12;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--green);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 10px 20px;
+  cursor: pointer;
+  backdrop-filter: blur(8px);
+  transition: background 0.15s, box-shadow 0.15s;
+}
+#tour-btn:hover {
+  background: rgba(118, 185, 0, 0.12);
+  box-shadow: 0 0 18px rgba(118, 185, 0, 0.25);
+}
+#tour-btn.hidden { display: none; }
+
+#tour-bar {
+  position: fixed;
+  bottom: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 15;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: min(760px, calc(100vw - 32px));
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 14px 44px 14px 18px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+}
+#tour-bar.hidden { display: none; }
+.tour-body { flex: 1; min-width: 0; }
+#tour-step {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--green);
+}
+#tour-text {
+  margin-top: 3px;
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+.tour-nav {
+  flex-shrink: 0;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 9px;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 9px 16px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+.tour-nav:hover { background: rgba(255,255,255,0.12); }
+.tour-nav:disabled { opacity: 0.35; cursor: default; }
+.tour-nav:disabled:hover { background: rgba(255,255,255,0.06); }
+.tour-nav.primary { background: var(--green); color: #0a0d05; border-color: transparent; }
+.tour-nav.primary:hover { filter: brightness(1.12); }
+#tour-exit {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+}
+#tour-exit:hover { color: var(--text); }
+body.touring #hint { display: none; }
+@media (max-width: 900px) {
+  body.touring #breadcrumb { display: none; }
+  #tour-bar { bottom: 12px; }
+}
+
 /* ---------- transition fade ---------- */
 #fade {
   position: fixed;
