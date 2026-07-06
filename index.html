@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>NVIDIA GB200 NVL72 — Interactive 3D Explorer</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2376b900'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="css/style.css" />
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three.module.min.js"
+  }
+}
+</script>
+</head>
+<body>
+<canvas id="scene"></canvas>
+
+<header id="header">
+  <div class="brand">
+    <span class="brand-mark"></span>
+    <h1>GB200 <span>NVL72</span></h1>
+  </div>
+  <p id="level-subtitle">Rack-scale exaflop AI system — click any component to inspect it</p>
+</header>
+
+<nav id="breadcrumb" aria-label="Zoom level">
+  <button data-level="rack"  class="crumb active">Rack</button>
+  <span class="crumb-sep">›</span>
+  <button data-level="tray"  class="crumb">Compute Tray</button>
+  <span class="crumb-sep">›</span>
+  <button data-level="board" class="crumb">GB200 Superchip</button>
+  <span class="crumb-sep">›</span>
+  <button data-level="chip"  class="crumb">Blackwell GPU</button>
+</nav>
+
+<aside id="info-panel" class="hidden" aria-live="polite">
+  <button id="info-close" aria-label="Close">×</button>
+  <div id="info-tag"></div>
+  <h2 id="info-name"></h2>
+  <p id="info-blurb"></p>
+  <table id="info-specs"></table>
+  <button id="info-drill" class="hidden"></button>
+</aside>
+
+<div id="tooltip" class="hidden"></div>
+
+<footer id="hint">
+  <span><b>Drag</b> rotate</span>
+  <span><b>Scroll</b> zoom</span>
+  <span><b>Right-drag</b> pan</span>
+  <span><b>Click</b> inspect part</span>
+  <span><b>Double-click</b> zoom into part</span>
+</footer>
+
+<div id="fade"></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
