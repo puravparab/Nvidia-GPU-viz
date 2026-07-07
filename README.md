@@ -19,7 +19,8 @@ full 120 kW liquid-cooled rack down to the silicon of a single Blackwell GPU pac
 - **Hover** any component for its name
 - **Click** a component to open its description and spec sheet
 - **Double-click** (or use the panel button) to zoom into a component that has more detail inside
-- Use the **breadcrumb** (top right) to jump between levels
+- Use the **breadcrumb** (top right) or **← / → arrow keys** to move between levels
+- During the guided tour, **← / →** step between stops and **Esc** exits
 
 ## Running
 

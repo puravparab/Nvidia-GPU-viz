@@ -169,10 +169,20 @@ tourNext.addEventListener('click', () => gotoStop(tourIdx + 1));
 tourPrev.addEventListener('click', () => gotoStop(tourIdx - 1));
 document.getElementById('tour-exit').addEventListener('click', endTour);
 window.addEventListener('keydown', e => {
-  if (tourIdx < 0) return;
-  if (e.key === 'ArrowRight') gotoStop(tourIdx + 1);
-  else if (e.key === 'ArrowLeft') gotoStop(tourIdx - 1);
-  else if (e.key === 'Escape') endTour();
+  if (tourIdx >= 0) {
+    // tour mode: arrows step between stops
+    if (e.key === 'ArrowRight') gotoStop(tourIdx + 1);
+    else if (e.key === 'ArrowLeft') gotoStop(tourIdx - 1);
+    else if (e.key === 'Escape') endTour();
+    return;
+  }
+  // normal mode: arrows step between zoom levels
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+    const i = LEVEL_ORDER.indexOf(currentLevel) + (e.key === 'ArrowRight' ? 1 : -1);
+    if (i >= 0 && i < LEVEL_ORDER.length) setLevel(LEVEL_ORDER[i]);
+  } else if (e.key === 'Escape') {
+    hidePanel();
+  }
 });
 
 /* ---------------- picking ---------------- */
