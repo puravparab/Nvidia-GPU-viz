@@ -19,7 +19,8 @@ full 120 kW liquid-cooled rack down to the silicon of a single Blackwell GPU pac
 - **Hover** any component for its name
 - **Click** a component to open its description and spec sheet
 - **Double-click** (or use the panel button) to zoom into a component that has more detail inside
-- Use the **breadcrumb** (top right) to jump between levels
+- Use the **breadcrumb** (top right) or **← / → arrow keys** to move between levels
+- During the guided tour, **← / →** step between stops and **Esc** exits
 
 ## Running
 
@@ -35,6 +36,23 @@ npx serve .
 then open http://localhost:8000. (A server is required because the app uses ES modules;
 opening `index.html` directly from disk will not work.)
 
+## Deploying (Cloudflare Pages)
+
+The site is fully static with no build step, so deployment is trivial.
+
+**Option A — Git integration (auto-deploys on every push):**
+1. Cloudflare dashboard → Workers & Pages → Create → Pages → *Connect to Git* → pick this repo
+2. Framework preset: **None** · Build command: *(empty)* · Build output directory: `/`
+3. Set the production branch (Settings → Builds & deployments) to whichever branch you ship from
+
+**Option B — one-off upload from your machine:**
+```sh
+npx wrangler login          # or set CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID
+npx wrangler pages deploy   # project name & output dir come from wrangler.jsonc
+```
+
+`wrangler.jsonc` and `_headers` (long-lived caching for the vendored Three.js) are already set up.
+
 ## Accuracy
 
 Geometry and specs are modeled after public NVIDIA documentation and teardowns of the
@@ -42,6 +60,10 @@ GB200 NVL72 / DGX GB200: 72 Blackwell GPUs + 36 Grace CPUs in one NVLink domain,
 1.44 exaFLOPS FP4, 13.4 TB HBM3e, 130 TB/s aggregate NVLink bandwidth, ~5,000-cable
 copper spine, and eight 33 kW power shelves feeding a 48 V DC busbar. It is an
 illustrative model, not CAD data.
+
+## Credits
+
+Built by [@notpurav](https://twitter.com/notpurav) with Claude Fable.
 
 ## Structure
 

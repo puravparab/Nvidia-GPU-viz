@@ -32,16 +32,16 @@ export function buildBoard() {
     pkg.position.set(gx, 0, -0.055);
     // substrate + interposer
     pkg.add(slab(0.115, 0.006, 0.115, 0.004, M.substrate(), 0, 0, 0));
-    pkg.add(box(0.1, 0.003, 0.082, M.silicon(), 0, 0.0075, 0));
+    pkg.add(box(0.106, 0.003, 0.076, M.silicon(), 0, 0.0075, 0));
     // two compute dies with the NV-HBI seam
-    pkg.add(box(0.03, 0.004, 0.056, dieMat, -0.017, 0.011, 0));
-    pkg.add(box(0.03, 0.004, 0.056, dieMat, 0.017, 0.011, 0));
-    pkg.add(box(0.0035, 0.0042, 0.056, glowMat(GREEN, 0.9), 0, 0.011, 0));
-    // 8 HBM3e stacks, 2×2 per side
+    pkg.add(box(0.026, 0.004, 0.05, dieMat, -0.0145, 0.011, 0));
+    pkg.add(box(0.026, 0.004, 0.05, dieMat, 0.0145, 0.011, 0));
+    pkg.add(box(0.0035, 0.0042, 0.05, glowMat(GREEN, 0.9), 0, 0.011, 0));
+    // 8 HBM3e stacks, 2×2 per side — all within the interposer footprint
     for (const sx of [-1, 1]) {
       for (let i = 0; i < 2; i++) {
         for (let j = 0; j < 2; j++) {
-          pkg.add(box(0.016, 0.006, 0.028, M.hbm(), sx * (0.041 + i * 0.019), 0.012, -0.017 + j * 0.034));
+          pkg.add(box(0.012, 0.006, 0.024, M.hbm(), sx * (0.034 + i * 0.0125), 0.012, -0.0145 + j * 0.029));
         }
       }
     }

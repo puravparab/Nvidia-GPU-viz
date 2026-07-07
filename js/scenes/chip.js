@@ -20,7 +20,7 @@ export function buildChip() {
   root.add(sub);
 
   /* ----- CoWoS interposer ----- */
-  const inter = box(0.98, 0.02, 0.66, mat(0x565c66, 0.32, 0.9), 0, 0.055, 0);
+  const inter = box(1.04, 0.02, 0.68, mat(0x565c66, 0.32, 0.9), 0, 0.055, 0);
   mark(inter, 'interposer');
   root.add(inter);
 
@@ -49,14 +49,15 @@ export function buildChip() {
     for (let col = 0; col < 2; col++) {
       for (let row = 0; row < 2; row++) {
         const stack = new THREE.Group();
-        const x = sx * (0.40 + col * 0.155);
+        // both columns stay on the interposer (x ±0.52), clear of the dies (±0.30)
+        const x = sx * (0.358 + col * 0.106);
         const z = -0.155 + row * 0.31;
         // 8-high stacked DRAM dies — visible layering
         for (let l = 0; l < 8; l++) {
-          stack.add(box(0.125, 0.0052, 0.26, l === 7 ? topM : layerM, x, 0.068 + l * 0.0062, z));
+          stack.add(box(0.10, 0.0052, 0.26, l === 7 ? topM : layerM, x, 0.068 + l * 0.0062, z));
         }
         // base logic die slightly wider
-        stack.add(box(0.132, 0.006, 0.268, mat(0x1c1f24, 0.45, 0.6), x, 0.062, z));
+        stack.add(box(0.106, 0.006, 0.266, mat(0x1c1f24, 0.45, 0.6), x, 0.062, z));
         mark(stack, 'hbmStack');
         root.add(stack);
       }
@@ -73,7 +74,7 @@ export function buildChip() {
     const edge = Math.floor(rand() * 4);
     let x, z;
     if (edge < 2) { x = (rand() - 0.5) * 1.04; z = (edge === 0 ? -1 : 1) * (0.37 + rand() * 0.06); }
-    else { x = (edge === 2 ? -1 : 1) * (0.51 + rand() * 0.05); z = (rand() - 0.5) * 0.6; }
+    else { x = (edge === 2 ? -1 : 1) * (0.545 + rand() * 0.025); z = (rand() - 0.5) * 0.6; }
     caps.add(box(0.014, 0.007, 0.008, rand() > 0.5 ? capM : capM2, x, 0.049, z));
   }
   mark(caps, 'capacitors');

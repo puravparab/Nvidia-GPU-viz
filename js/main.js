@@ -2,6 +2,7 @@ import * as THREE from 'three';
 import { OrbitControls } from '../vendor/OrbitControls.js';
 import { RoomEnvironment } from '../vendor/RoomEnvironment.js';
 import { INFO, LEVELS } from './data.js';
+import { TOUR } from './tour.js';
 import { GREEN } from './common.js';
 import { buildRack } from './scenes/rack.js';
 import { buildTray } from './scenes/tray.js';
@@ -62,7 +63,7 @@ const cache = {};
 const fadeEl = document.getElementById('fade');
 const subtitleEl = document.getElementById('level-subtitle');
 
-function setLevel(level, { instant = false } = {}) {
+function setLevel(level, { instant = false, panelKey = null, cam = null } = {}) {
   const apply = () => {
     if (current) scene.remove(current.group);
     clearHover();
@@ -82,8 +83,8 @@ function setLevel(level, { instant = false } = {}) {
     scene.add(current.group);
 
     const c = current.camera;
-    camera.position.set(...c.pos);
-    controls.target.set(...c.target);
+    camera.position.set(...(cam?.pos ?? c.pos));
+    controls.target.set(...(cam?.target ?? c.target));
     controls.minDistance = c.min;
     controls.maxDistance = c.max;
     controls.update();
@@ -95,7 +96,7 @@ function setLevel(level, { instant = false } = {}) {
     document.querySelectorAll('.crumb').forEach(b => {
       b.classList.toggle('active', b.dataset.level === level);
     });
-    showPanel(current.defaultInfo, { auto: true });
+    showPanel(panelKey ?? current.defaultInfo, { auto: true });
   };
 
   if (instant) { apply(); return; }
@@ -108,8 +109,80 @@ function setLevel(level, { instant = false } = {}) {
 
 document.querySelectorAll('.crumb').forEach(b => {
   b.addEventListener('click', () => {
+    if (tourIdx >= 0) endTour();
     if (b.dataset.level !== currentLevel) setLevel(b.dataset.level);
   });
+});
+
+/* ---------------- camera fly-to ---------------- */
+let camTween = null;
+function flyTo(pos, target, dur = 1.15) {
+  camTween = {
+    p0: camera.position.clone(), t0: controls.target.clone(),
+    p1: new THREE.Vector3(...pos), t1: new THREE.Vector3(...target),
+    start: performance.now(), dur: dur * 1000,
+  };
+}
+const easeInOut = k => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+
+/* ---------------- guided tour ---------------- */
+let tourIdx = -1;
+const tourBtn = document.getElementById('tour-btn');
+const tourBar = document.getElementById('tour-bar');
+const tourStepEl = document.getElementById('tour-step');
+const tourTextEl = document.getElementById('tour-text');
+const tourPrev = document.getElementById('tour-prev');
+const tourNext = document.getElementById('tour-next');
+
+function startTour() {
+  document.body.classList.add('touring');
+  tourBar.classList.remove('hidden');
+  tourBtn.classList.add('hidden');
+  controls.autoRotate = false;
+  gotoStop(0);
+}
+function endTour() {
+  tourIdx = -1;
+  camTween = null;
+  document.body.classList.remove('touring');
+  tourBar.classList.add('hidden');
+  tourBtn.classList.remove('hidden');
+}
+function gotoStop(i) {
+  if (i < 0 || i >= TOUR.length) { endTour(); return; }
+  tourIdx = i;
+  const s = TOUR[i];
+  tourStepEl.textContent = `STOP ${i + 1} OF ${TOUR.length}`;
+  tourTextEl.textContent = s.text;
+  tourPrev.disabled = i === 0;
+  tourNext.textContent = i === TOUR.length - 1 ? 'Finish ✓' : 'Next ›';
+  if (s.level !== currentLevel) {
+    // cross-level: fade, then start at the stop's viewpoint
+    setLevel(s.level, { panelKey: s.info, cam: s });
+  } else {
+    flyTo(s.pos, s.target);
+    showPanel(s.info);
+  }
+}
+tourBtn.addEventListener('click', startTour);
+tourNext.addEventListener('click', () => gotoStop(tourIdx + 1));
+tourPrev.addEventListener('click', () => gotoStop(tourIdx - 1));
+document.getElementById('tour-exit').addEventListener('click', endTour);
+window.addEventListener('keydown', e => {
+  if (tourIdx >= 0) {
+    // tour mode: arrows step between stops
+    if (e.key === 'ArrowRight') gotoStop(tourIdx + 1);
+    else if (e.key === 'ArrowLeft') gotoStop(tourIdx - 1);
+    else if (e.key === 'Escape') endTour();
+    return;
+  }
+  // normal mode: arrows step between zoom levels
+  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
+    const i = LEVEL_ORDER.indexOf(currentLevel) + (e.key === 'ArrowRight' ? 1 : -1);
+    if (i >= 0 && i < LEVEL_ORDER.length) setLevel(LEVEL_ORDER[i]);
+  } else if (e.key === 'Escape') {
+    hidePanel();
+  }
 });
 
 /* ---------------- picking ---------------- */
@@ -199,6 +272,7 @@ let downPos = null;
 canvas.addEventListener('pointerdown', e => {
   downPos = [e.clientX, e.clientY];
   controls.autoRotate = false;
+  camTween = null; // user grabbed the camera mid-flight
 });
 canvas.addEventListener('pointerup', e => {
   if (!downPos) return;
@@ -254,6 +328,13 @@ setLevel('rack', { instant: true });
 
 function tick() {
   requestAnimationFrame(tick);
+  if (camTween) {
+    const k = Math.min(1, (performance.now() - camTween.start) / camTween.dur);
+    const e = easeInOut(k);
+    camera.position.lerpVectors(camTween.p0, camTween.p1, e);
+    controls.target.lerpVectors(camTween.t0, camTween.t1, e);
+    if (k >= 1) camTween = null;
+  }
   controls.update();
   if (pointerMoved && !downPos) {
     setHover(pick());

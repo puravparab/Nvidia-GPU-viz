@@ -1,0 +1,5 @@
+{
+  // Cloudflare Pages config — lets `npx wrangler pages deploy` run with no flags.
+  "name": "nvidia-gpu-viz",
+  "pages_build_output_dir": "."
+}
