@@ -10,8 +10,15 @@ full 120 kW liquid-cooled rack down to the silicon of a single Blackwell GPU pac
 |---|---|
 | **Rack** | The full NVL72: 18 compute trays, 9 NVLink switch trays, 8 power shelves, 48 V busbar, NVLink copper cable spine, and liquid-cooling manifolds |
 | **Compute Tray** | A 1U MGX tray with the lid off: two GB200 "Bianca" boards, cold plates, coolant loops, ConnectX-7 NICs, BlueField-3 DPUs, E1.S storage and blind-mate rear connectors |
-| **GB200 Superchip** | The bare Bianca board: one Grace CPU with its 16 LPDDR5X packages, two Blackwell B200 GPUs, glowing NVLink-C2C lanes, VRM banks and NVLink edge connectors |
+| **Switch Tray** | Inside an NVLink switch tray: two NVLink 5 switch ASICs (one exposed, one under its cold plate), the rear blind-mate backplane field and coolant loop |
+| **GB200 Superchip** | The bare Bianca board: one Grace CPU ringed by LPDDR5X packages, two Blackwell B200 GPUs, glowing NVLink-C2C lanes, VRM banks and NVLink edge connectors |
 | **Blackwell GPU** | The B200 package: two reticle-limit compute dies, the 10 TB/s NV-HBI bridge, eight HBM3e stacks, the CoWoS interposer and decoupling capacitor fields |
+| **Grace CPU** | The Grace package: a monolithic 72-core Neoverse V2 die with its fabric band, NVLink-C2C PHY edge and LPDDR5X controller strips |
+| **NVSwitch ASIC** | The NVLink 5 switch package: one monolithic 50B-transistor die with SerDes PHY banks lining the port edges |
+| **HBM3e Stack** | An exploded HBM tower: eight DRAM dies over the base logic die, through-silicon via columns and micro-bump arrays |
+
+Levels form a tree: the main spine is Rack → Compute Tray → GB200 Superchip → Blackwell GPU → HBM3e,
+with side branches Rack → Switch Tray → NVSwitch and GB200 Superchip → Grace CPU.
 
 ## Interaction
 

@@ -8,9 +8,28 @@ import { buildRack } from './scenes/rack.js';
 import { buildTray } from './scenes/tray.js';
 import { buildBoard } from './scenes/board.js';
 import { buildChip } from './scenes/chip.js';
+import { buildSwitchTray } from './scenes/switchtray.js';
+import { buildGrace } from './scenes/grace.js';
+import { buildNvswitch } from './scenes/nvswitch.js';
+import { buildHbm } from './scenes/hbm.js';
 
-const BUILDERS = { rack: buildRack, tray: buildTray, board: buildBoard, chip: buildChip };
-const LEVEL_ORDER = ['rack', 'tray', 'board', 'chip'];
+const BUILDERS = {
+  rack: buildRack, tray: buildTray, board: buildBoard, chip: buildChip,
+  switchtray: buildSwitchTray, grace: buildGrace, nvswitch: buildNvswitch, hbm: buildHbm,
+};
+// levels form a tree: main spine rack→tray→board→chip→hbm, with side
+// branches rack→switchtray→nvswitch and board→grace
+const PARENT = {
+  rack: null, tray: 'rack', switchtray: 'rack', board: 'tray',
+  chip: 'board', grace: 'board', nvswitch: 'switchtray', hbm: 'chip',
+};
+const PRIMARY_CHILD = {
+  rack: 'tray', tray: 'board', board: 'chip', chip: 'hbm', switchtray: 'nvswitch',
+};
+const CRUMB_LABELS = {
+  rack: 'Rack', tray: 'Compute Tray', board: 'GB200 Superchip', chip: 'Blackwell GPU',
+  hbm: 'HBM3e', switchtray: 'Switch Tray', nvswitch: 'NVSwitch', grace: 'Grace CPU',
+};
 
 /* ---------------- renderer / scene ---------------- */
 const canvas = document.getElementById('scene');
@@ -93,10 +112,12 @@ function setLevel(level, { instant = false, panelKey = null, cam = null } = {}) 
     scene.fog.density = level === 'rack' ? 0.045 : 0.0;
 
     subtitleEl.textContent = LEVELS[level].subtitle;
-    document.querySelectorAll('.crumb').forEach(b => {
-      b.classList.toggle('active', b.dataset.level === level);
-    });
+    renderBreadcrumb();
     showPanel(panelKey ?? current.defaultInfo, { auto: true });
+    // shareable deep link (skip during the tour; it has its own flow)
+    if (tourIdx < 0) {
+      history.replaceState(null, '', level === 'rack' ? location.pathname + location.search : '#' + level);
+    }
   };
 
   if (instant) { apply(); return; }
@@ -107,12 +128,23 @@ function setLevel(level, { instant = false, panelKey = null, cam = null } = {}) 
   }, 290);
 }
 
-document.querySelectorAll('.crumb').forEach(b => {
-  b.addEventListener('click', () => {
-    if (tourIdx >= 0) endTour();
-    if (b.dataset.level !== currentLevel) setLevel(b.dataset.level);
+/* breadcrumb: path from the rack to the current level, then the primary
+   drill-down chain onward, so the depth hierarchy stays visible */
+const breadcrumbEl = document.getElementById('breadcrumb');
+function renderBreadcrumb() {
+  const chain = [];
+  for (let l = currentLevel; l; l = PARENT[l]) chain.unshift(l);
+  for (let l = PRIMARY_CHILD[currentLevel]; l; l = PRIMARY_CHILD[l]) chain.push(l);
+  breadcrumbEl.innerHTML = chain
+    .map(l => `<button data-level="${l}" class="crumb${l === currentLevel ? ' active' : ''}">${CRUMB_LABELS[l]}</button>`)
+    .join('<span class="crumb-sep">›</span>');
+  breadcrumbEl.querySelectorAll('.crumb').forEach(b => {
+    b.addEventListener('click', () => {
+      if (tourIdx >= 0) endTour();
+      if (b.dataset.level !== currentLevel) setLevel(b.dataset.level);
+    });
   });
-});
+}
 
 /* ---------------- camera fly-to ---------------- */
 let camTween = null;
@@ -176,10 +208,11 @@ window.addEventListener('keydown', e => {
     else if (e.key === 'Escape') endTour();
     return;
   }
-  // normal mode: arrows step between zoom levels
-  if (e.key === 'ArrowRight' || e.key === 'ArrowLeft') {
-    const i = LEVEL_ORDER.indexOf(currentLevel) + (e.key === 'ArrowRight' ? 1 : -1);
-    if (i >= 0 && i < LEVEL_ORDER.length) setLevel(LEVEL_ORDER[i]);
+  // normal mode: → drills into the primary child, ← climbs to the parent
+  if (e.key === 'ArrowRight' && PRIMARY_CHILD[currentLevel]) {
+    setLevel(PRIMARY_CHILD[currentLevel]);
+  } else if (e.key === 'ArrowLeft' && PARENT[currentLevel]) {
+    setLevel(PARENT[currentLevel]);
   } else if (e.key === 'Escape') {
     hidePanel();
   }
@@ -324,7 +357,13 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
 });
 
-setLevel('rack', { instant: true });
+// deep link support: /#grace, /#hbm, /#switchtray, ...
+const startLevel = BUILDERS[location.hash.slice(1)] ? location.hash.slice(1) : 'rack';
+setLevel(startLevel, { instant: true });
+window.addEventListener('hashchange', () => {
+  const l = location.hash.slice(1) || 'rack';
+  if (BUILDERS[l] && l !== currentLevel && tourIdx < 0) setLevel(l);
+});
 
 function tick() {
   requestAnimationFrame(tick);
