@@ -19,6 +19,11 @@ export const TOUR = [
     text: 'The nine NVLink switch trays in the middle stitch all 72 GPUs into one fabric. Any GPU can talk to any other at 1.8 TB/s — that is what makes the rack one big GPU.',
   },
   {
+    level: 'switchtray', info: 'nvswitchPackage',
+    pos: [0.5, 0.6, 0.8], target: [0, 0, -0.05],
+    text: 'Pop one open: two NVLink 5 switch ASICs, 50 billion transistors each, spent entirely on moving data — 7.2 TB/s per chip, with SHARP engines doing math inside the network.',
+  },
+  {
     level: 'rack', info: 'powerShelf',
     pos: [0.8, 2.0, 1.4], target: [0, 1.8, 0.3],
     text: 'Eight power shelves convert facility AC into 48 V DC, 33 kW each, using hot-swappable supply modules with N+1 redundancy.',
@@ -49,6 +54,11 @@ export const TOUR = [
     text: 'The bare GB200 superchip board. In front sits the Grace CPU: 72 Arm cores ringed by 480 GB of LPDDR5X memory.',
   },
   {
+    level: 'grace', info: 'graceDie',
+    pos: [0.75, 0.95, 1.2], target: [0, 0.02, 0],
+    text: 'The Grace die up close: 72 identical Neoverse V2 core tiles on a mesh, 117 MB of L3, and PHY strips on the edges where 900 GB/s leaves for the GPUs.',
+  },
+  {
     level: 'board', info: 'c2cLink',
     pos: [0.28, 0.3, 0.22], target: [0.06, 0, 0.02],
     text: 'The glowing lanes are NVLink-C2C: 900 GB/s of cache-coherent bandwidth that fuses CPU and GPU memory into a single pool.',
@@ -72,6 +82,11 @@ export const TOUR = [
     level: 'chip', info: 'hbmStack',
     pos: [1.15, 0.8, 0.95], target: [0.35, 0.08, 0],
     text: 'Eight HBM3e towers — each a stack of eight DRAM dies — feed the GPU 8 TB/s of memory bandwidth. 72 of these packages fill the rack you started at.',
+  },
+  {
+    level: 'hbm', info: 'hbmTsv',
+    pos: [1.3, 1.1, 1.7], target: [0, 0.65, 0],
+    text: 'Peel one open: eight DRAM dies on a logic base, stitched together by thousands of through-silicon vias — the vertical wiring that makes 8 TB/s possible.',
   },
   {
     level: 'rack', info: 'rack',

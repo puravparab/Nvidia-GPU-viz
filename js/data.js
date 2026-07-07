@@ -3,10 +3,14 @@
 // `drill` marks components that can be zoomed into (a deeper scene level).
 
 export const LEVELS = {
-  rack:  { title: 'GB200 NVL72 Rack',        subtitle: 'Rack-scale exaflop AI system — click any component to inspect it' },
-  tray:  { title: 'Compute Tray',            subtitle: '1U liquid-cooled MGX tray — lid removed, click components to inspect' },
-  board: { title: 'GB200 Superchip (Bianca)', subtitle: 'One Grace CPU + two Blackwell GPUs on a single superchip board' },
-  chip:  { title: 'Blackwell B200 GPU',      subtitle: 'Dual-die GPU package with 8 stacks of HBM3e — click the silicon' },
+  rack:       { title: 'GB200 NVL72 Rack',         subtitle: 'Rack-scale exaflop AI system — click any component to inspect it' },
+  tray:       { title: 'Compute Tray',             subtitle: '1U liquid-cooled MGX tray — lid removed, click components to inspect' },
+  switchtray: { title: 'NVLink Switch Tray',       subtitle: '1U switch tray, lid removed — two NVLink 5 ASICs stitch all 72 GPUs together' },
+  board:      { title: 'GB200 Superchip (Bianca)', subtitle: 'One Grace CPU + two Blackwell GPUs on a single superchip board' },
+  chip:       { title: 'Blackwell B200 GPU',       subtitle: 'Dual-die GPU package with 8 stacks of HBM3e — click the silicon' },
+  grace:      { title: 'Grace CPU Package',        subtitle: '72 Arm Neoverse V2 cores purpose-built to keep two Blackwells fed' },
+  nvswitch:   { title: 'NVLink 5 Switch ASIC',     subtitle: '50 billion transistors spent entirely on moving data between GPUs' },
+  hbm:        { title: 'HBM3e Stack — Exploded',   subtitle: 'Eight DRAM dies on a logic base, joined by thousands of through-silicon vias' },
 };
 
 export const INFO = {
@@ -51,6 +55,7 @@ export const INFO = {
       ['In-network compute', '3.6 TFLOPS SHARP v4 (FP8)'],
       ['Cooling', 'Liquid-cooled cold plates'],
     ],
+    drill: 'switchtray', drillLabel: 'Open switch tray →',
   },
   powerShelf: {
     tag: 'Power', name: 'Power Shelf (33 kW)',
@@ -217,6 +222,7 @@ export const INFO = {
       ['NVLink-C2C', '900 GB/s to GPUs'],
       ['Power', '~300 W'],
     ],
+    drill: 'grace', drillLabel: 'Inspect Grace package →',
   },
   lpddr: {
     tag: 'Memory', name: 'LPDDR5X Memory',
@@ -306,6 +312,7 @@ export const INFO = {
       ['Total', '192 GB @ 8 TB/s'],
       ['Connection', 'TSVs on silicon interposer'],
     ],
+    drill: 'hbm', drillLabel: 'Explode the stack →',
   },
   interposer: {
     tag: 'Packaging', name: 'CoWoS-L Interposer',
@@ -318,15 +325,140 @@ export const INFO = {
   },
   substrate: {
     tag: 'Packaging', name: 'Package Substrate',
-    blurb: 'The green-black laminate that carries the whole assembly and fans signals out to thousands of solder balls on the underside. It also delivers over a kilowatt of power up into the silicon through dense via arrays.',
+    blurb: 'The green-black laminate that carries the whole assembly and fans signals out to thousands of solder balls on the underside. It also delivers the chip’s power — hundreds of watts to over a kilowatt — up into the silicon through dense via arrays.',
     specs: [
       ['Role', 'Signal fan-out + power delivery'],
       ['Underside', 'Thousands of BGA balls'],
     ],
   },
+  /* =========================== SWITCH TRAY LEVEL ========================== */
+  switchTrayChassis: {
+    tag: 'Structure', name: 'Switch Tray Chassis (1U)',
+    blurb: 'The same MGX 1U form factor as the compute trays, but every watt here is spent on networking. In the NVL72 configuration there are no front cables at all — all 144 NVLink ports leave through blind-mate connectors at the rear, straight onto the copper spine.',
+    specs: [
+      ['Height', '1U (44.45 mm)'],
+      ['ASICs', '2× NVLink 5 switch chips'],
+      ['Service', 'Tool-less slide-out'],
+    ],
+  },
+  nvswitchPackage: {
+    tag: 'Interconnect', name: 'NVLink 5 Switch ASIC',
+    blurb: 'One of the two switch chips in the tray: a reticle-class monolithic die with 50 billion transistors — nearly a full GPU’s worth of silicon spent purely on moving data. Each chip switches 7.2 TB/s across 72 NVLink 5 ports, and its SHARP v4 engines execute reduction math inside the network itself.',
+    specs: [
+      ['Transistors', '50 billion'],
+      ['Process', 'TSMC 4NP'],
+      ['Ports', '72× NVLink 5 @ 100 GB/s'],
+      ['Bandwidth', '7.2 TB/s per chip'],
+      ['In-network compute', 'SHARP v4 (FP8)'],
+    ],
+    drill: 'nvswitch', drillLabel: 'Inspect switch silicon →',
+  },
+  swColdplate: {
+    tag: 'Cooling', name: 'Switch Cold Plate',
+    blurb: 'Each switch ASIC gets its own liquid cold plate, plumbed to the same rack manifolds as the compute trays. Dense SerDes running flat-out generate several hundred watts per chip — far too much for air in a 1U box.',
+    specs: [
+      ['Heat absorbed', 'Several hundred W per ASIC'],
+      ['Material', 'Nickel-plated copper'],
+    ],
+  },
+  swBackplane: {
+    tag: 'Interconnect', name: 'NVLink Backplane Connectors',
+    blurb: 'The dense gold connector field at the rear is where all 144 NVLink ports leave the tray. They blind-mate into the cable spine, whose cartridges fan the lanes out so that every one of the 72 GPUs reaches every switch chip.',
+    specs: [
+      ['Ports', '144× NVLink 5 per tray'],
+      ['Bandwidth', '14.4 TB/s per tray'],
+      ['Mating', 'Blind-mate, floating alignment'],
+    ],
+  },
+
+  /* ============================ GRACE PACKAGE LEVEL ======================= */
+  graceDie: {
+    tag: 'Silicon', name: 'Grace Compute Die',
+    blurb: 'A monolithic die with 72 Arm Neoverse V2 cores arranged on a mesh, tied together by NVIDIA’s Scalable Coherency Fabric — 3.2 TB/s of bisection bandwidth — and 117 MB of shared L3 cache. Built on TSMC 4N, it exists for one job: keeping two Blackwell GPUs supplied with data.',
+    specs: [
+      ['Cores', '72× Arm Neoverse V2'],
+      ['Fabric', '3.2 TB/s bisection'],
+      ['L3 cache', '117 MB'],
+      ['Process', 'TSMC 4N'],
+    ],
+  },
+  graceC2cPhy: {
+    tag: 'Interconnect', name: 'NVLink-C2C PHY',
+    blurb: 'The glowing strip along the die edge is where NVLink-C2C leaves the chip: 900 GB/s of coherent bandwidth to the two Blackwell GPUs a few centimetres away. This edge is why the GPUs can treat Grace’s 480 GB of LPDDR5X as their own memory.',
+    specs: [
+      ['Bandwidth', '900 GB/s bidirectional'],
+      ['Coherency', 'Full cache coherence'],
+    ],
+  },
+  graceMemPhy: {
+    tag: 'Memory', name: 'LPDDR5X Controllers & PHY',
+    blurb: 'Memory controllers and PHYs line the die edges, driving the LPDDR5X packages that sit millimetres away on the board. Short traces are the trick: they enable DDR5-class bandwidth — up to 512 GB/s — at a fraction of the I/O power.',
+    specs: [
+      ['Bandwidth', 'Up to 512 GB/s'],
+      ['Memory', '480 GB LPDDR5X, ECC'],
+    ],
+  },
+
+  /* =========================== NVSWITCH PACKAGE LEVEL ===================== */
+  nvswitchDie: {
+    tag: 'Silicon', name: 'NVLink Switch Die',
+    blurb: 'A single monolithic die — no chiplets, because every nanosecond of switching latency is felt by 72 GPUs at once. Its 50 billion transistors implement a non-blocking crossbar, banks of SerDes, and SHARP v4 arithmetic engines that run all-reduce operations inside the switch, roughly doubling effective bandwidth for collectives.',
+    specs: [
+      ['Transistors', '50 billion'],
+      ['Process', 'TSMC 4NP'],
+      ['Crossbar', 'Non-blocking, 72 ports'],
+      ['SHARP v4', '3.6 TFLOPS FP8 in-network'],
+    ],
+  },
+  nvswitchPhy: {
+    tag: 'Interconnect', name: 'NVLink 5 SerDes (PHY)',
+    blurb: 'The strips along the die edges are the port PHYs: high-speed SerDes driving ~200 Gb/s PAM4 lanes directly onto passive copper. Running electrical instead of optical at this speed is an engineering feat — and it is what saves ~20 kW per rack.',
+    specs: [
+      ['Signalling', '~200 Gb/s PAM4 lanes'],
+      ['Medium', 'Passive copper, no retimers'],
+      ['Ports', '72 per chip'],
+    ],
+  },
+
+  /* ============================= HBM STACK LEVEL ========================== */
+  hbmDramDie: {
+    tag: 'Memory', name: 'DRAM Die (×8)',
+    blurb: 'Each floating layer is a complete 3 GB DRAM chip, ground down to tens of microns — several times thinner than a human hair — so that eight of them stack into a tower shorter than a grain of rice. Together they hold the 24 GB this stack contributes.',
+    specs: [
+      ['Capacity', '3 GB per die'],
+      ['Dies per stack', '8 (plus base die)'],
+      ['Thickness', 'Tens of microns each'],
+    ],
+  },
+  hbmBaseDie: {
+    tag: 'Silicon', name: 'Base Logic Die',
+    blurb: 'The foundation of the stack. It carries the PHY, control and test logic: translating the GPU’s requests into DRAM commands for the eight dies above, and driving the 1,024-bit interface down into the interposer.',
+    specs: [
+      ['Interface', '1,024-bit to interposer'],
+      ['Role', 'PHY, control, repair logic'],
+    ],
+  },
+  hbmTsv: {
+    tag: 'Interconnect', name: 'Through-Silicon Vias',
+    blurb: 'The vertical columns are TSVs: thousands of copper conductors drilled straight through every DRAM die. They are what makes stacking work — signals travel micrometres instead of centimetres, at a fraction of the energy a PCB trace would burn.',
+    specs: [
+      ['Count', 'Thousands per stack'],
+      ['Function', 'Vertical power + data'],
+      ['Benefit', 'µm-scale paths, minimal energy'],
+    ],
+  },
+  hbmBumps: {
+    tag: 'Packaging', name: 'Micro-bumps',
+    blurb: 'Between each pair of dies sit arrays of solder micro-bumps at a pitch of tens of microns — the physical joints that bond the tower together and carry every TSV connection from one layer to the next.',
+    specs: [
+      ['Pitch', 'Tens of microns'],
+      ['Role', 'Die-to-die bonding + signal'],
+    ],
+  },
+
   capacitors: {
     tag: 'Power', name: 'Decoupling Capacitors',
-    blurb: 'The fields of tiny components around the silicon are decoupling capacitors — local energy reservoirs that smooth the power supply when 208 billion transistors switch simultaneously. Without them, voltage droop would crash the GPU at every clock burst.',
+    blurb: 'The fields of tiny components around the silicon are decoupling capacitors — local energy reservoirs that smooth the power supply when tens of billions of transistors switch simultaneously. Without them, voltage droop would crash the chip at every clock burst.',
     specs: [
       ['Role', 'Transient current supply'],
       ['Response', 'Nanosecond-scale'],
