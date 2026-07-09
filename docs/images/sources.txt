@@ -1,0 +1,32 @@
+switchtray-internals.jpg
+Source page: https://www.servethehome.com/this-is-the-nvidia-dgx-gb200-nvl72/
+Image URL: https://www.servethehome.com/wp-content/uploads/2024/03/NVIDIA-DGX-GB200-NVL72-Switch-Tray-Internal.jpeg
+
+computetray-internals.jpg
+Source page: https://www.servethehome.com/this-is-the-nvidia-dgx-gb200-nvl72/
+Image URL: https://www.servethehome.com/wp-content/uploads/2024/03/NVIDIA-DGX-GB200-NVL72-Compute-Nodes-Internal.jpeg
+
+computetray-front.jpg
+Source page: https://www.servethehome.com/this-is-the-nvidia-dgx-gb200-nvl72/
+Image URL: https://www.servethehome.com/wp-content/uploads/2024/03/NVIDIA-DGX-GB200-NVL72-Compute-Node-Front.jpg
+
+rack-front.jpg
+Source page: https://www.servethehome.com/this-is-the-nvidia-dgx-gb200-nvl72/
+Image URL: https://www.servethehome.com/wp-content/uploads/2024/03/NVIDIA-DGX-GB200-NVL72-Front-1.jpg
+
+rack-rear.jpg
+Source page: https://www.servethehome.com/this-is-the-nvidia-dgx-gb200-nvl72/
+Image URL: https://www.servethehome.com/wp-content/uploads/2024/03/NVIDIA-DGX-GB200-NVL72-Rear.jpg
+
+b200-package.jpg
+Source page: https://www.servethehome.com/this-is-the-nvidia-dgx-gb200-nvl72/
+Image URL: https://www.servethehome.com/wp-content/uploads/2024/03/NVIDIA-Blackwell-GPU.jpeg
+Note: high-resolution real hardware photo. I also found cleaner marketing renders, but kept the real photo per preference.
+
+gb200-superchip.jpg
+Source page: https://glennklockwood.com/garden/processors/b200
+Image URL: https://glennklockwood.com/garden/attachments/gb200-nvl72-superchip.jpeg
+
+nvl72-row.jpg
+Source page: https://blogs.nvidia.com/blog/blackwell-ai-inference/
+Image URL: https://blogs.nvidia.com/wp-content/uploads/2025/09/21-coreweave-aifactory-scaled.jpg
