@@ -12,22 +12,24 @@ import { buildSwitchTray } from './scenes/switchtray.js';
 import { buildGrace } from './scenes/grace.js';
 import { buildNvswitch } from './scenes/nvswitch.js';
 import { buildHbm } from './scenes/hbm.js';
+import { buildDatacenter } from './scenes/datacenter.js';
 
 const BUILDERS = {
+  datacenter: buildDatacenter,
   rack: buildRack, tray: buildTray, board: buildBoard, chip: buildChip,
   switchtray: buildSwitchTray, grace: buildGrace, nvswitch: buildNvswitch, hbm: buildHbm,
 };
-// levels form a tree: main spine rack→tray→board→chip→hbm, with side
+// levels form a tree: main spine datacenter→rack→tray→board→chip→hbm, with side
 // branches rack→switchtray→nvswitch and board→grace
 const PARENT = {
-  rack: null, tray: 'rack', switchtray: 'rack', board: 'tray',
+  datacenter: null, rack: 'datacenter', tray: 'rack', switchtray: 'rack', board: 'tray',
   chip: 'board', grace: 'board', nvswitch: 'switchtray', hbm: 'chip',
 };
 const PRIMARY_CHILD = {
-  rack: 'tray', tray: 'board', board: 'chip', chip: 'hbm', switchtray: 'nvswitch',
+  datacenter: 'rack', rack: 'tray', tray: 'board', board: 'chip', chip: 'hbm', switchtray: 'nvswitch',
 };
 const CRUMB_LABELS = {
-  rack: 'Rack', tray: 'Compute Tray', board: 'GB200 Superchip', chip: 'Blackwell GPU',
+  datacenter: 'AI Factory', rack: 'Rack', tray: 'Compute Tray', board: 'GB200 Superchip', chip: 'Blackwell GPU',
   hbm: 'HBM3e', switchtray: 'Switch Tray', nvswitch: 'NVSwitch', grace: 'Grace CPU',
 };
 
@@ -108,8 +110,14 @@ function setLevel(level, { instant = false, panelKey = null, cam = null } = {}) 
     controls.maxDistance = c.max;
     controls.update();
 
-    // rack scene sits on a floor; close-up scenes float in the void
-    scene.fog.density = level === 'rack' ? 0.045 : 0.0;
+    // grounded scenes use fog for depth; close-up scenes float in the void
+    scene.fog.density = { rack: 0.045, datacenter: 0.02 }[level] ?? 0.0;
+
+    // widen shadow coverage for the big datacenter scene, tight for close-ups
+    const shadowExtent = level === 'datacenter' ? 12 : 3;
+    key.shadow.camera.left = key.shadow.camera.bottom = -shadowExtent;
+    key.shadow.camera.right = key.shadow.camera.top = shadowExtent;
+    key.shadow.camera.updateProjectionMatrix();
 
     subtitleEl.textContent = LEVELS[level].subtitle;
     renderBreadcrumb();

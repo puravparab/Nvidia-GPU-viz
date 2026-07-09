@@ -188,7 +188,12 @@ export function buildRack() {
   const spine = new THREE.Group();
   const spineH = 28 * U; // spans compute + switch bays
   const spineY = plinth + topPad + H - (5 + 1 + 14) * U; // roughly centred on switch bay
-  spine.add(box(0.34, spineH, 0.05, mat(0x101113, 0.55, 0.55), 0, spineY, -TD / 2 - 0.075));
+  // four stacked NVLink cartridges with visible gaps between sections
+  const cartM = mat(0x101113, 0.55, 0.55);
+  const cartH = spineH / 4 - 0.012;
+  for (let i = 0; i < 4; i++) {
+    spine.add(box(0.34, cartH, 0.05, cartM, 0, spineY + (i - 1.5) * (spineH / 4), -TD / 2 - 0.075));
+  }
   const cableM = mat(0x1c1e22, 0.8, 0.25);
   for (let i = 0; i < 10; i++) {
     spine.add(cyl(0.012, 0.012, spineH * 0.96, cableM, -0.145 + i * 0.032, spineY, -TD / 2 - 0.108, 10));

@@ -2,7 +2,7 @@ import * as THREE from 'three';
 import { mat, box, cyl, slab, led, tube, mark, dieTexture, M, GREEN } from '../common.js';
 
 /**
- * NVLink switch tray, lid removed. Two NVLink 5 switch ASICs side by side;
+ * NVLink switch tray, lid removed. Two NVLink 5 switch ASICs inline on the centerline;
  * one under its cold plate, one exposed to show the silicon. In the NVL72
  * all 144 ports blind-mate at the rear — no front cables. Front of tray = +Z.
  */
@@ -34,9 +34,9 @@ export function buildSwitchTray() {
     emissive: 0x2a3550, emissiveIntensity: 0.22, emissiveMap: dieTex,
   });
 
-  /* ----- ASIC 1 (left): under its cold plate ----- */
+  /* ----- ASIC 1 (rear): under its cold plate ----- */
   const covered = new THREE.Group();
-  covered.position.set(-0.125, 0.008, -0.05);
+  covered.position.set(0, 0.008, -0.20);
   covered.add(slab(0.13, 0.005, 0.13, 0.005, M.substrate(), 0, 0, 0));
   const plate1 = new THREE.Group();
   plate1.add(slab(0.12, 0.022, 0.12, 0.008, M.nickel(), 0, 0.005, 0));
@@ -48,9 +48,9 @@ export function buildSwitchTray() {
   mark(covered, 'nvswitchPackage');
   root.add(covered);
 
-  /* ----- ASIC 2 (right): exposed silicon ----- */
+  /* ----- ASIC 2 (front): exposed silicon ----- */
   const exposed = new THREE.Group();
-  exposed.position.set(0.125, 0.008, -0.05);
+  exposed.position.set(0, 0.008, 0.02);
   exposed.add(slab(0.13, 0.005, 0.13, 0.005, M.substrate(), 0, 0, 0));
   exposed.add(box(0.085, 0.004, 0.075, dieMat, 0, 0.007, 0));
   // port PHY strips along two die edges
@@ -68,10 +68,11 @@ export function buildSwitchTray() {
   /* ----- coolant loop ----- */
   const loop = new THREE.Group();
   const tubeM = M.rubber();
-  loop.add(tube([[-0.06, 0.035, -0.42], [-0.125, 0.04, -0.28], [-0.125, 0.035, -0.13]], 0.0075, tubeM));
-  loop.add(tube([[0.06, 0.035, -0.42], [0.125, 0.04, -0.28], [0.125, 0.035, -0.13]], 0.0075, tubeM));
-  loop.add(tube([[-0.125, 0.035, 0.03], [0, 0.04, 0.1], [0.125, 0.035, 0.03]], 0.0075, tubeM));
-  for (const [qx, col] of [[-0.06, M.blueTube()], [0.06, M.redTube()]]) {
+  // series plumbing along the centerline: QDs → rear package → front package
+  loop.add(tube([[-0.045, 0.035, -0.42], [-0.03, 0.04, -0.34], [0, 0.035, -0.27]], 0.0075, tubeM));
+  loop.add(tube([[0.045, 0.035, -0.42], [0.03, 0.04, -0.34], [0, 0.035, -0.27]], 0.0075, tubeM));
+  loop.add(tube([[0, 0.035, -0.12], [0, 0.045, -0.09], [0, 0.035, -0.06]], 0.0075, tubeM));
+  for (const [qx, col] of [[-0.045, M.blueTube()], [0.045, M.redTube()]]) {
     const qd = cyl(0.011, 0.011, 0.045, col, qx, 0.035, -0.435, 12);
     qd.rotation.x = Math.PI / 2;
     loop.add(qd);
@@ -102,7 +103,7 @@ export function buildSwitchTray() {
     }
   }
   for (let i = 0; i < 5; i++) {
-    vrm.add(box(0.016, 0.01, 0.016, indM, 0, 0.011, -0.22 + i * 0.05));
+    vrm.add(box(0.016, 0.01, 0.016, indM, -0.16, 0.011, -0.22 + i * 0.05));
   }
   mark(vrm, 'vrm');
   root.add(vrm);

@@ -3,6 +3,7 @@
 // `drill` marks components that can be zoomed into (a deeper scene level).
 
 export const LEVELS = {
+  datacenter: { title: 'AI Factory',               subtitle: 'Many NVL72 racks woven into one supercomputer — click a rack, CDU or spine switch' },
   rack:       { title: 'GB200 NVL72 Rack',         subtitle: 'Rack-scale exaflop AI system — click any component to inspect it' },
   tray:       { title: 'Compute Tray',             subtitle: '1U liquid-cooled MGX tray — lid removed, click components to inspect' },
   switchtray: { title: 'NVLink Switch Tray',       subtitle: '1U switch tray, lid removed — two NVLink 5 ASICs stitch all 72 GPUs together' },
@@ -14,10 +15,64 @@ export const LEVELS = {
 };
 
 export const INFO = {
+  /* ============================== DATACENTER LEVEL ======================== */
+  datacenter: {
+    tag: 'Cluster', name: 'AI Factory',
+    blurb: 'One NVL72 is a scale-up domain of 72 GPUs. To train and serve frontier models you need many of them, so racks are connected by a second, scale-out network into a single supercomputer. NVIDIA’s reference designs tile NVL72 racks into rows — a DGX SuperPOD reaches tens of thousands of GPUs, and the largest AI factories run into the hundreds of thousands.',
+    specs: [
+      ['Building block', '1 NVL72 = 72 GPUs'],
+      ['Scale-up (in rack)', 'NVLink, 130 TB/s'],
+      ['Scale-out (between racks)', 'Quantum-X800 IB / Spectrum-X'],
+      ['SuperPOD', 'Tens of thousands of GPUs'],
+      ['Power', 'Multiple MW per row'],
+      ['Cooling', 'Facility water via CDUs'],
+    ],
+    drill: 'rack', drillLabel: 'Enter a single rack →',
+  },
+  dcRack: {
+    tag: 'System', name: 'GB200 NVL72 Rack',
+    blurb: 'The highlighted rack is the one you explored. In a deployment it is one identical tile in a row of many — each an independent 72-GPU NVLink domain, all stitched together by the scale-out fabric into one training job. Click through to step back inside it.',
+    specs: [
+      ['This rack', '72 GPUs, ~120 kW'],
+      ['Role', 'One scale-up domain'],
+      ['Identical siblings', 'Rows of NVL72 racks'],
+    ],
+    drill: 'rack', drillLabel: 'Enter this rack →',
+  },
+  cdu: {
+    tag: 'Cooling', name: 'Coolant Distribution Unit',
+    blurb: 'A CDU is the bridge between the building’s water and the racks. A heat exchanger isolates the two loops, and pumps push filtered, temperature-controlled coolant through the rack manifolds. In-row units like these sit right beside the racks they serve; a single large CDU can reject on the order of a megawatt of heat.',
+    specs: [
+      ['Role', 'Facility ↔ rack coolant bridge'],
+      ['Isolation', 'Liquid-to-liquid heat exchanger'],
+      ['Capacity', '~1 MW class (in-row)'],
+      ['Provides', 'Filtered, flow/temp-controlled loop'],
+    ],
+  },
+  spineSwitch: {
+    tag: 'Networking', name: 'Scale-out Spine Switch',
+    blurb: 'These end-of-row switches form the scale-out fabric that links racks together — a different network from the NVLink inside each rack. NVIDIA uses Quantum-X800 InfiniBand or Spectrum-X Ethernet at 800 Gb/s per port, in a fat-tree so any GPU can reach any other GPU across the whole cluster.',
+    specs: [
+      ['Fabric', 'Quantum-X800 IB / Spectrum-X'],
+      ['Port speed', '800 Gb/s'],
+      ['Topology', 'Fat-tree, non-blocking'],
+      ['Connects', 'ConnectX-7 / BlueField-3 in every tray'],
+    ],
+  },
+  dcFloor: {
+    tag: 'Facility', name: 'Data Hall',
+    blurb: 'The room itself: a raised-floor or slab data hall laid out in hot and cold aisles. Power comes in as medium-voltage AC and is distributed along overhead busways; liquid cooling and high-speed cabling run in trays above the rows. A single hall like this can draw tens of megawatts.',
+    specs: [
+      ['Layout', 'Hot / cold aisle rows'],
+      ['Power delivery', 'Overhead busway'],
+      ['Draw', 'Tens of MW per hall'],
+    ],
+  },
+
   /* ============================== RACK LEVEL ============================== */
   rack: {
     tag: 'System', name: 'NVIDIA GB200 NVL72',
-    blurb: 'A single liquid-cooled rack that behaves like one giant GPU. 36 Grace CPUs and 72 Blackwell GPUs are fused into one NVLink domain, delivering real-time inference for trillion-parameter models. The rack weighs about 1.36 tonnes and contains more than 5,000 copper cables.',
+    blurb: 'A single liquid-cooled rack that behaves like one giant GPU. 36 Grace CPUs and 72 Blackwell GPUs are fused into one NVLink domain, delivering real-time inference for trillion-parameter models. The rack weighs about 1.36 tonnes and contains more than 5,000 copper cables. It is one tile in a much larger AI factory.',
     specs: [
       ['GPUs / CPUs', '72 Blackwell + 36 Grace'],
       ['FP4 inference', '1,440 PFLOPS (1.4 exaFLOPS)'],
@@ -28,6 +83,7 @@ export const INFO = {
       ['Power', '~120 kW, liquid-cooled'],
       ['Form factor', 'NVIDIA MGX rack'],
     ],
+    drill: 'datacenter', drillLabel: 'Zoom out to the AI factory →',
   },
   computeTray: {
     tag: 'Compute', name: 'Compute Tray (1U)',

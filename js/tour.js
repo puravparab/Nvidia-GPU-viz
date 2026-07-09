@@ -91,6 +91,11 @@ export const TOUR = [
   {
     level: 'rack', info: 'rack',
     pos: [2.1, 1.75, 2.9], target: [0, 1.05, 0],
-    text: 'That’s the GB200 NVL72 — from a 120 kW rack down to nanometre silicon. Explore freely: every component is clickable.',
+    text: 'That’s the GB200 NVL72 — from a 120 kW rack down to nanometre silicon. One more step back…',
+  },
+  {
+    level: 'datacenter', info: 'datacenter',
+    pos: [6.5, 5.2, 8.5], target: [0, 0.8, 0],
+    text: 'And one last step back: in production, this rack is a single tile. Rows of NVL72s, coolant distribution units and a scale-out fabric fuse tens of thousands of GPUs into one AI factory. Explore freely: every component is clickable.',
   },
 ];

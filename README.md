@@ -8,6 +8,7 @@ full 120 kW liquid-cooled rack down to the silicon of a single Blackwell GPU pac
 
 | Level | What you see |
 |---|---|
+| **AI Factory** | Zoomed-out datacenter view: rows of NVL72 racks in hot/cold aisles, in-row coolant distribution units, end-of-row scale-out spine switches and overhead busways |
 | **Rack** | The full NVL72: 18 compute trays, 9 NVLink switch trays, 8 power shelves, 48 V busbar, NVLink copper cable spine, and liquid-cooling manifolds |
 | **Compute Tray** | A 1U MGX tray with the lid off: two GB200 "Bianca" boards, cold plates, coolant loops, ConnectX-7 NICs, BlueField-3 DPUs, E1.S storage and blind-mate rear connectors |
 | **Switch Tray** | Inside an NVLink switch tray: two NVLink 5 switch ASICs (one exposed, one under its cold plate), the rear blind-mate backplane field and coolant loop |
@@ -17,7 +18,7 @@ full 120 kW liquid-cooled rack down to the silicon of a single Blackwell GPU pac
 | **NVSwitch ASIC** | The NVLink 5 switch package: one monolithic 50B-transistor die with SerDes PHY banks lining the port edges |
 | **HBM3e Stack** | An exploded HBM tower: eight DRAM dies over the base logic die, through-silicon via columns and micro-bump arrays |
 
-Levels form a tree: the main spine is Rack → Compute Tray → GB200 Superchip → Blackwell GPU → HBM3e,
+Levels form a tree: the main spine is AI Factory → Rack → Compute Tray → GB200 Superchip → Blackwell GPU → HBM3e,
 with side branches Rack → Switch Tray → NVSwitch and GB200 Superchip → Grace CPU.
 
 ## Interaction

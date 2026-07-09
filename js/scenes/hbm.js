@@ -41,7 +41,7 @@ export function buildHbm() {
   const colH = dieYs[LAYERS - 1] + 0.014 - baseY;
   for (let i = 0; i < 7; i++) {
     for (let j = 0; j < 4; j++) {
-      tsvs.add(cyl(0.009, 0.009, colH, tsvM, -0.24 + i * 0.08, baseY + colH / 2 + 0.02, -0.15 + j * 0.1, 8));
+      tsvs.add(cyl(0.009, 0.009, colH, tsvM, -0.24 + i * 0.08, baseY + colH / 2, -0.15 + j * 0.1, 8));
     }
   }
   mark(tsvs, 'hbmTsv');
