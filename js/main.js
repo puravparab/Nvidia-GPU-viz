@@ -12,7 +12,7 @@ import { buildSwitchTray } from './scenes/switchtray.js';
 import { buildGrace } from './scenes/grace.js';
 import { buildNvswitch } from './scenes/nvswitch.js';
 import { buildHbm } from './scenes/hbm.js';
-import { buildDatacenter } from './scenes/datacenter.js?v=20260710-12';
+import { buildDatacenter } from './scenes/datacenter.js?v=20260710-13';
 
 const BUILDERS = {
   datacenter: buildDatacenter,

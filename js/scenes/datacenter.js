@@ -100,15 +100,6 @@ export function buildDatacenter() {
       if (row.faceNeg) unit.rotation.y = Math.PI;       // front faces the outer/aisle side
       mark(unit, isCdu ? 'cdu' : 'dcRack');
       root.add(unit);
-      if (isHi) {
-        const beam = new THREE.Mesh(
-          new THREE.CylinderGeometry(0.018, 0.018, 3.4, 8),
-          new THREE.MeshBasicMaterial({ color: GREEN, transparent: true, opacity: 0.22 })
-        );
-        beam.position.set(colX(j), RH + 1.7, row.z);
-        root.add(beam);
-        noHi.add(beam.id);
-      }
     }
   });
 
