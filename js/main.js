@@ -1,18 +1,18 @@
 import * as THREE from 'three';
 import { OrbitControls } from '../vendor/OrbitControls.js';
 import { RoomEnvironment } from '../vendor/RoomEnvironment.js';
-import { INFO, LEVELS } from './data.js';
-import { TOUR } from './tour.js';
+import { INFO, LEVELS } from './data.js?v=20260710-12';
+import { TOUR } from './tour.js?v=20260710-12';
 import { GREEN } from './common.js';
 import { buildRack } from './scenes/rack.js';
 import { buildTray } from './scenes/tray.js';
-import { buildBoard } from './scenes/board.js';
+import { buildBoard } from './scenes/board.js?v=20260710-11';
 import { buildChip } from './scenes/chip.js';
 import { buildSwitchTray } from './scenes/switchtray.js';
 import { buildGrace } from './scenes/grace.js';
 import { buildNvswitch } from './scenes/nvswitch.js';
 import { buildHbm } from './scenes/hbm.js';
-import { buildDatacenter } from './scenes/datacenter.js';
+import { buildDatacenter } from './scenes/datacenter.js?v=20260710-12';
 
 const BUILDERS = {
   datacenter: buildDatacenter,
@@ -109,7 +109,6 @@ const cache = {};
 let lastViewScale = responsiveViewScale(currentLevel);
 
 const fadeEl = document.getElementById('fade');
-const subtitleEl = document.getElementById('level-subtitle');
 
 function setLevel(level, { instant = false, panelKey = null, cam = null } = {}) {
   const apply = () => {
@@ -158,7 +157,6 @@ function setLevel(level, { instant = false, panelKey = null, cam = null } = {}) 
     key.shadow.camera.far = level === 'datacenter' ? 40 : 20;
     key.shadow.camera.updateProjectionMatrix();
 
-    subtitleEl.textContent = LEVELS[level].subtitle;
     renderBreadcrumb();
     showPanel(panelKey ?? current.defaultInfo, { auto: true });
     // shareable deep link (skip during the tour; it has its own flow)

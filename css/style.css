@@ -39,25 +39,12 @@ html, body {
   z-index: 10;
 }
 .brand { display: flex; flex-direction: column; }
-.brand .unofficial {
-  font-size: 0.68rem;
-  color: var(--text-dim);
-  letter-spacing: 0.02em;
-  margin-top: 2px;
-}
 .brand h1 {
   font-size: 1.55rem;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 .brand h1 span { color: var(--green); font-weight: 300; }
-#level-subtitle {
-  margin-top: 6px;
-  color: var(--text-dim);
-  font-size: 0.85rem;
-  max-width: 420px;
-}
-
 /* ---------- breadcrumb ---------- */
 #breadcrumb {
   position: fixed;
@@ -256,10 +243,14 @@ html, body {
   color: var(--text-dim);
   background: var(--panel);
   border: 1px solid rgba(255,255,255,0.07);
-  border-radius: 999px;
-  padding: 8px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  border-radius: 13px;
+  padding: 7px 14px 8px;
   backdrop-filter: blur(8px);
 }
+.credit-main { display: flex; align-items: center; }
 #credit a {
   color: var(--green);
   font-weight: 600;
@@ -267,7 +258,16 @@ html, body {
 }
 #credit a:hover { text-decoration: underline; }
 .credit-sep { margin: 0 5px; color: #3a4147; }
-.credit-note { color: #6b757c; }
+.github-link {
+  display: inline-flex;
+  width: 16px;
+  height: 16px;
+  align-items: center;
+  justify-content: center;
+}
+.github-link svg { width: 15px; height: 15px; fill: currentColor; }
+.github-link:hover { color: #9ddb3a; }
+.credit-note { color: #6b757c; font-size: 0.62rem; }
 @media (max-width: 900px) {
   #credit { display: none; }
 }
@@ -383,8 +383,6 @@ body.pointer-interactive { cursor: pointer; }
     top: max(12px, env(safe-area-inset-top));
   }
   .brand h1 { font-size: 1.4rem; }
-  #level-subtitle { display: none; }
-
   #breadcrumb {
     top: calc(max(12px, env(safe-area-inset-top)) + 46px);
     right: max(10px, env(safe-area-inset-right));

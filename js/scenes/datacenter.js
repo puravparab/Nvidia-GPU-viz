@@ -91,6 +91,8 @@ export function buildDatacenter() {
 
   rows.forEach((row, r) => {
     for (let j = 0; j < PER_ROW; j++) {
+      // Clear the sightline immediately in front of and behind the hero rack.
+      if (j === hi.col && (r === hi.row - 1 || r === hi.row + 1)) continue;
       const isCdu = j === cduCol;
       const isHi = r === hi.row && j === hi.col;
       const unit = isCdu ? cduT.clone() : (isHi ? rackProxy(true) : rackT.clone());
@@ -192,7 +194,8 @@ export function buildDatacenter() {
   const clusterPitchX = rowLen + 2.4;
   for (let gx = -1; gx <= 1; gx++) {
     for (let gz = -2; gz <= 2; gz++) {
-      if (gx === 0 && gz === 0) continue;           // the detailed pods live here
+      // Leave a full front-to-back viewing corridor through the hero pod.
+      if (gx === 0) continue;
       for (const row of rows) {
         const body = box(rowLen, RH, RD, farBodyM, gx * clusterPitchX, RH / 2, gz * clusterPitchZ + row.z);
         far.add(body);

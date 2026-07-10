@@ -119,10 +119,13 @@ export function buildNvswitch() {
   labelTex.colorSpace = THREE.SRGBColorSpace;
   const label = new THREE.Mesh(
     new THREE.PlaneGeometry(0.42, 0.105),
-    new THREE.MeshBasicMaterial({ map: labelTex, transparent: true })
+    new THREE.MeshBasicMaterial({
+      map: labelTex, transparent: true, depthWrite: false,
+      polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+    })
   );
   label.rotation.x = -Math.PI / 2;
-  label.position.set(-0.21, 0.0415, 0.395);
+  label.position.set(-0.21, 0.043, 0.395);
   root.add(label);
 
   /* ----- shadow disc ----- */

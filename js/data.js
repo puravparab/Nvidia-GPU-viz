@@ -3,15 +3,15 @@
 // `drill` marks components that can be zoomed into (a deeper scene level).
 
 export const LEVELS = {
-  datacenter: { title: 'AI Factory',               subtitle: 'Many NVL72 racks woven into one supercomputer — click a rack, CDU or fabric switch rack' },
-  rack:       { title: 'GB200 NVL72 Rack',         subtitle: 'Rack-scale exaflop AI system — click any component to inspect it' },
-  tray:       { title: 'Compute Tray',             subtitle: '1U hybrid-cooled compute tray — lid removed, click components to inspect' },
-  switchtray: { title: 'NVLink Switch Tray',       subtitle: '1U switch tray, lid removed — two NVLink 5 ASICs stitch all 72 GPUs together' },
-  board:      { title: 'GB200 Superchip (Bianca)', subtitle: 'One Grace CPU + two Blackwell GPUs on a single superchip board' },
-  chip:       { title: 'Blackwell B200 GPU',       subtitle: 'Dual-die GPU package with 8 stacks of HBM3e — click the silicon' },
-  grace:      { title: 'Grace CPU Package',        subtitle: '72 Arm Neoverse V2 cores purpose-built to keep two Blackwells fed' },
-  nvswitch:   { title: 'NVLink 5 Switch ASIC',     subtitle: '50 billion transistors spent entirely on moving data between GPUs' },
-  hbm:        { title: 'HBM3e Stack — Exploded',   subtitle: 'Illustrative eight-high DRAM stack on a logic base, joined by through-silicon vias' },
+  datacenter: { title: 'AI Factory' },
+  rack:       { title: 'GB200 NVL72 Rack' },
+  tray:       { title: 'Compute Tray' },
+  switchtray: { title: 'NVLink Switch Tray' },
+  board:      { title: 'GB200 Superchip (Bianca)' },
+  chip:       { title: 'Blackwell B200 GPU' },
+  grace:      { title: 'Grace CPU Package' },
+  nvswitch:   { title: 'NVLink 5 Switch ASIC' },
+  hbm:        { title: 'HBM3e Stack — Exploded' },
 };
 
 export const INFO = {
@@ -55,7 +55,7 @@ export const INFO = {
   },
   spineSwitch: {
     tag: 'Networking', name: 'Scale-out Fabric Switch Rack',
-    blurb: 'These network racks represent the leaf-and-spine fabric linking NVL72 racks. It is separate from the NVLink fabric inside each rack. A DGX GB200 exposes one 400 Gb/s ConnectX-7 port per GPU for InfiniBand or Ethernet scale-out traffic.',
+    blurb: 'These illustrative network racks represent the leaf-and-spine compute fabric linking NVL72 racks. This scale-out network is separate from the NVLink fabric inside each rack. A DGX GB200 rack has 72 single-port 400 Gb/s ConnectX-7 adapters—four in each of its 18 compute trays.',
     specs: [
       ['Endpoint speed', '400 Gb/s per ConnectX-7'],
       ['Rack endpoints', '72× OSFP ConnectX-7'],
@@ -66,18 +66,18 @@ export const INFO = {
   },
   dcFloor: {
     tag: 'Facility', name: 'Data Hall',
-    blurb: 'The room itself: a raised-floor or slab data hall laid out in hot and cold aisles. Power comes in as medium-voltage AC and is distributed along overhead busways; liquid cooling and high-speed cabling run in trays above the rows. A single hall like this can draw tens of megawatts.',
+    blurb: 'The room itself: an illustrative data hall arranged around equipment rows and service aisles. Power, liquid-cooling distribution and high-speed network cabling are facility-specific; this scene shows one plausible overhead-busway and in-row-CDU layout rather than a prescribed NVIDIA design.',
     specs: [
       ['Layout', 'Hot / cold aisle rows'],
       ['Power delivery', 'Overhead busway'],
-      ['Draw', 'Tens of MW per hall'],
+      ['Implementation', 'Site-specific'],
     ],
   },
 
   /* ============================== RACK LEVEL ============================== */
   rack: {
     tag: 'System', name: 'NVIDIA GB200 NVL72',
-    blurb: 'A hybrid-cooled rack that behaves like one giant GPU. Direct liquid cooling handles the high-power silicon while fans cool storage and management hardware. Its 36 Grace CPUs and 72 Blackwell GPUs share one NVLink domain; the rack weighs about 1.36 tonnes and contains more than 5,000 copper cables.',
+    blurb: 'A hybrid-cooled rack that behaves like one giant GPU. Direct liquid cooling handles the high-power silicon while fans cool storage and management hardware. Its 36 Grace CPUs and 72 Blackwell GPUs share one NVLink domain connected through four cable cartridges containing more than 5,000 copper cables.',
     specs: [
       ['GPUs / CPUs', '72 Blackwell + 36 Grace'],
       ['NVFP4 sparse | dense', '1,440 | 720 PFLOPS'],
@@ -103,7 +103,6 @@ export const INFO = {
       ['NVFP4 sparse | dense', '80 | 40 PFLOPS per tray'],
       ['HBM3e', '744 GB usable per tray'],
       ['LPDDR5X', '960 GB per tray'],
-      ['Power', 'Up to ~6.3 kW (max TDP)'],
       ['Cooling', 'Direct-to-chip liquid cold plates'],
     ],
     sources: [['NVIDIA DGX GB hardware guide', 'https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html']],
@@ -111,14 +110,13 @@ export const INFO = {
   },
   switchTray: {
     tag: 'Interconnect', name: 'NVLink Switch Tray (1U)',
-    blurb: 'The nine switch trays in the middle of the rack are the heart of the NVL72 fabric. Each carries two NVLink 5 switch ASICs and provides 144 NVLink ports, letting all 72 GPUs talk to each other at full speed as if they were one chip. SHARP v4 engines perform in-network reductions for collective operations.',
+    blurb: 'The nine switch trays form the NVL72 fabric. Each 1U tray carries two NVLink 5 switch ASICs with 72 ports apiece. NVIDIA rates the switch-tray system at 57.6 Tb/s of full-duplex bandwidth, while SHARP engines accelerate collective operations inside the fabric.',
     specs: [
       ['Per rack', '9 trays'],
       ['ASICs', '2× NVLink 5 switch chips'],
-      ['Ports', '144 NVLink ports @ 100 GB/s'],
-      ['Port-rate sum', '14.4 TB/s per tray'],
-      ['Switch ASIC', '50B transistors, TSMC 4NP'],
-      ['In-network compute', '3.6 TFLOPS SHARP v4 (FP8)'],
+      ['Ports', '2× 72 NVLink ports'],
+      ['Full-duplex bandwidth', '57.6 Tb/s per tray'],
+      ['In-network compute', 'SHARP collectives'],
       ['Cooling', 'Liquid-cooled cold plates'],
     ],
     sources: [['NVIDIA DGX GB hardware guide', 'https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html']],
@@ -139,10 +137,10 @@ export const INFO = {
   },
   mgmtSwitch: {
     tag: 'Networking', name: 'Rack Management Switch',
-    blurb: 'A top-of-rack Ethernet switch for out-of-band management. It connects the BMCs of every tray, the power shelves and the leak-detection sensors so operators can monitor and service the rack independently of the compute fabric.',
+    blurb: 'A top-of-rack Ethernet switch for out-of-band management. NVIDIA documents two TOR switches connecting the compute-tray BMCs, BlueField-3 BMC interfaces and NVLink switch trays to the management network.',
     specs: [
       ['Role', 'Out-of-band management'],
-      ['Connects', 'Tray BMCs, power shelves, sensors'],
+      ['Connects', 'Compute and switch tray BMCs'],
       ['Height', '1U'],
       ['Per rack', '2 TOR switches'],
     ],
@@ -153,17 +151,17 @@ export const INFO = {
     specs: [
       ['Voltage', 'Nominal 50–51 V DC'],
       ['Design class', 'High-current rack busbar'],
-      ['Material', 'Solid copper'],
-      ['Connection', 'Blind-mate, tool-less trays'],
+      ['Published capacity', 'Up to 1,400 A'],
+      ['Connection', 'Rack components mate to busbar'],
     ],
+    sources: [['NVIDIA OCP design contribution', 'https://developer.nvidia.com/blog/nvidia-contributes-nvidia-gb200-nvl72-designs-to-open-compute-project/']],
   },
   spine: {
     tag: 'Interconnect', name: 'Four NVLink Cable Cartridges',
-    blurb: 'The copper backbone of the NVL72 is split across four rear cartridges housing more than 5,000 coaxial copper cables—about 3.2 km of wire. They connect every GPU to one port on each of the 18 NVSwitch ASICs through blind-mate tray connectors.',
+    blurb: 'The copper backbone of the NVL72 is split across four rear cartridges housing more than 5,000 coaxial copper cables. Through rear tray connectors, the cartridges form the all-to-all NVLink fabric between the 72 GPUs and the switch trays.',
     specs: [
       ['Cartridges', '4 rear cable modules'],
-      ['Cables', '5,000+ passive copper pairs'],
-      ['Total length', '~2 miles / 3.2 km'],
+      ['Cables', '5,000+ coaxial copper cables'],
       ['Aggregate bandwidth', '130 TB/s'],
     ],
     sources: [['NVIDIA OCP design contribution', 'https://developer.nvidia.com/blog/nvidia-contributes-nvidia-gb200-nvl72-designs-to-open-compute-project/']],
@@ -172,7 +170,7 @@ export const INFO = {
     tag: 'Cooling', name: 'Liquid Cooling Manifold',
     blurb: 'Vertical supply and return manifolds distribute technology-cooling-system fluid to every compute and switch tray through blind-mate quick-disconnects. A facility CDU isolates and controls this secondary loop; exact temperatures and flow rates depend on the site design.',
     specs: [
-      ['Type', 'Direct-to-chip, warm water'],
+      ['Type', 'Direct-to-chip liquid cooling'],
       ['Loop', 'Facility CDU ↔ rack manifold'],
       ['Connection', 'Blind-mate quick disconnects'],
       ['Monitored by', 'Rack and tray leak detection'],
@@ -180,18 +178,18 @@ export const INFO = {
   },
   rackFrame: {
     tag: 'Structure', name: 'OCP ORv3-Derived Rack Enclosure',
-    blurb: 'The 48U DGX design builds on OCP Open Rack v3 with adaptations for dense 19-inch EIA equipment. Reinforced rails, blind-mate slides, seismic bracing, and a rear extension protect the cable cartridges and manifold fittings. NVIDIA contributed the liquid-cooled rack design to the Open Compute Project.',
+    blurb: 'The 48U layout adapts Open Rack design principles for dense 1U, 19-inch EIA equipment. NVIDIA documents added steel reinforcement, blind-mate slide rails and a rear extension that protects cable bracing and manifold fittings, and contributed the liquid-cooled rack design to the Open Compute Project.',
     specs: [
       ['Format', '48U, OCP ORv3-derived'],
       ['Equipment mounting', 'Adapted 19-inch EIA'],
-      ['Weight loaded', '~1,360 kg (3,000 lb)'],
-      ['Components', '~600,000 parts per rack'],
+      ['Added reinforcement', 'More than 100 lb of steel'],
+      ['Designed mating force', '6,000 lb across components'],
     ],
     sources: [['NVIDIA OCP design contribution', 'https://developer.nvidia.com/blog/nvidia-contributes-nvidia-gb200-nvl72-designs-to-open-compute-project/']],
   },
   leakTray: {
     tag: 'Safety', name: 'Leakage Drip Pan',
-    blurb: 'A monitored pan at the bottom of the rack catches any coolant that reaches the base. It works with tray- and rack-level leak sensors so operators can isolate a fault before liquid reaches powered equipment.',
+    blurb: 'This bottom pan represents secondary containment for the liquid-cooled rack. NVIDIA documents rack leak detection, but the pan geometry and sensor placement shown here are illustrative rather than official CAD.',
     specs: [
       ['Location', 'Bottom service bay'],
       ['Role', 'Containment + early leak detection'],
@@ -218,33 +216,31 @@ export const INFO = {
       ['CPU', '1× Grace, 72 Arm cores'],
       ['GPUs', '2× Blackwell B200'],
       ['Coherent memory', '852 GB usable per superchip'],
-      ['Board power', '~2.7 kW'],
     ],
     sources: [['NVIDIA GB200 NVL72 specifications', 'https://www.nvidia.com/en-us/data-center/gb200-nvl72/']],
     drill: 'board', drillLabel: 'Inspect GB200 superchip →',
   },
   gpuColdplate: {
     tag: 'Cooling', name: 'GPU Cold Plate',
-    blurb: 'A black production cold-plate assembly clamps a nickel-plated copper microchannel plate to each Blackwell package. Coolant carries away up to roughly 1,200 W per GPU; the dark upper housing provides pressure, fittings, and protection around the plate.',
+    blurb: 'A direct-liquid-cooling assembly sits over each Blackwell package and transfers heat into the tray coolant loop. The geometry shown here is illustrative; NVIDIA’s public user guide identifies the liquid-cooled components but does not publish the internal cold-plate construction.',
     specs: [
-      ['Heat absorbed', 'Up to 1,200 W per GPU'],
-      ['Material', 'Nickel-plated copper'],
-      ['Design', 'Micro-fin liquid channels'],
+      ['Scope', 'One cold plate per GPU'],
+      ['Cooling', 'Direct liquid cooling'],
     ],
   },
   cpuColdplate: {
     tag: 'Cooling', name: 'CPU Cold Plate',
-    blurb: 'Each Grace CPU has its own direct-liquid-cooling assembly connected to the tray manifold. It is smaller than the two neighboring Blackwell cold plates because the CPU dissipates substantially less heat than the GPUs.',
+    blurb: 'Each Grace CPU has a direct-liquid-cooling assembly connected to the tray coolant loop. Its form in this visualization is illustrative; the NVIDIA hardware guide confirms liquid cooling for the CPU but does not publish the plate’s internal construction.',
     specs: [
-      ['Relative load', 'Lower than adjacent GPUs'],
-      ['Material', 'Nickel-plated copper'],
+      ['Scope', 'One cold plate per Grace CPU'],
+      ['Cooling', 'Direct liquid cooling'],
     ],
   },
   coolantLoop: {
     tag: 'Cooling', name: 'Coolant Tubing & Quick-Disconnects',
-    blurb: 'Flexible hoses link the cold plates to rear quick-disconnect couplings that blind-mate with the rack manifolds. The couplings are dripless — trays can be pulled while the rest of the rack keeps running.',
+    blurb: 'Flexible hoses link the cold plates to supply and return couplings at the rear of the tray, where the tray connects to the rack’s liquid-cooling manifolds. Exact coupling and service procedures depend on the production system documentation.',
     specs: [
-      ['Couplings', 'Dripless blind-mate QDs'],
+      ['Couplings', 'Rear supply and return'],
       ['Loop', 'Supply + return per tray'],
     ],
   },
@@ -273,12 +269,11 @@ export const INFO = {
     ],
   },
   graceGraceLink: {
-    tag: 'Interconnect', name: 'Grace–Grace Coherent Link',
-    blurb: 'The tan connector near the front edge carries a coherent NVLink connection to the sibling Bianca board in the same tray — up to 600 GB/s bidirectional. It lets the two Grace CPUs share memory, storage and NICs like a dual-socket server, which is why deployments can depopulate down to a single frontend NIC per tray.',
+    tag: 'Interconnect', name: 'Board-to-Board Coherent Link',
+    blurb: 'This connector represents the coherent link between the two GB200 compute boards in a tray. NVIDIA’s SuperPOD reference architecture confirms that the two superchips are bridged for one operating-system instance; the connector geometry and lane-level implementation shown here are illustrative.',
     specs: [
-      ['Bandwidth', 'Up to 600 GB/s bidirectional'],
-      ['Coherency', 'Shared memory across boards'],
-      ['Enables', 'NIC/storage sharing per tray'],
+      ['Scope', 'Two GB200 boards per tray'],
+      ['Role', 'Coherent board-to-board connection'],
     ],
     sources: [['SemiAnalysis GB200 hardware architecture', 'https://newsletter.semianalysis.com/p/gb200-hardware-architecture-and-component']],
   },
@@ -348,33 +343,35 @@ export const INFO = {
     blurb: 'A 72-core Arm Neoverse V2 processor purpose-built to feed GPUs. Its LPDDR5X memory is soldered right beside the die for bandwidth and efficiency no DIMM system can match, and NVLink-C2C makes that memory directly addressable by both Blackwell GPUs.',
     specs: [
       ['Cores', '72× Arm Neoverse V2'],
-      ['Memory', '480 GB usable LPDDR5X nearby'],
+      ['Memory', 'Up to 480 GB LPDDR5X nearby'],
       ['Memory bandwidth', 'Up to 512 GB/s'],
       ['NVLink-C2C', '900 GB/s aggregate to 2 GPUs'],
-      ['Power', '~300 W'],
+    ],
+    sources: [
+      ['NVIDIA Grace CPU architecture', 'https://developer.nvidia.com/blog/inside-nvidia-grace-cpu-nvidia-amps-up-superchip-engineering-for-hpc-and-ai/'],
+      ['NVIDIA Grace CPU product page', 'https://www.nvidia.com/en-us/data-center/grace-cpu-superchip/'],
     ],
     drill: 'grace', drillLabel: 'Inspect Grace package →',
   },
   lpddr: {
     tag: 'Memory', name: 'LPDDR5X Memory',
-    blurb: 'Two banks of LPDDR5X packages flank the Grace package — 480 GB of ECC memory at a fraction of the power an equivalent DDR5 DIMM setup would draw. This is the “capacity tier”: huge models spill from GPU HBM into this pool over NVLink-C2C.',
+    blurb: 'Banks of server-class LPDDR5X packages flank the Grace package, providing up to 480 GB with ECC. NVIDIA specifies up to 512 GB/s of bandwidth and about one-fifth the power of conventional DDR memory.',
     specs: [
-      ['Capacity', '480 GB per Grace'],
+      ['Capacity', 'Up to 480 GB per Grace'],
       ['Bandwidth', 'Up to 512 GB/s'],
       ['Type', 'LPDDR5X with ECC'],
-      ['Efficiency', '~1/8 the power per byte of DDR5'],
+      ['Efficiency', 'About 1/5 the power of DDR5'],
     ],
   },
   b200Package: {
     tag: 'GPU', name: 'Blackwell B200 GPU',
-    blurb: 'Two reticle-limited dies are fused by a 10 TB/s bridge so software sees one GPU, flanked by eight HBM3e stacks. Current GB200 NVL72 specifications expose 186 GB of usable HBM3e per B200; package photos show eight physical memory stacks.',
+    blurb: 'Two reticle-limited dies are joined by a 10 TB/s chip-to-chip link so software sees one GPU, flanked by eight HBM3e packages. Current GB200 NVL72 specifications expose 186 GB of usable HBM3e per B200.',
     specs: [
       ['Transistors', '208 billion'],
       ['Process', 'TSMC 4NP, dual die'],
       ['Memory', '186 GB usable HBM3e'],
       ['Memory bandwidth', '8 TB/s'],
       ['NVFP4 sparse | dense', '20 | 10 PFLOPS'],
-      ['Power', 'Up to 1,200 W'],
     ],
     sources: [
       ['NVIDIA GB200 NVL72 specifications', 'https://www.nvidia.com/en-us/data-center/gb200-nvl72/'],
@@ -384,12 +381,10 @@ export const INFO = {
   },
   c2cLink: {
     tag: 'Interconnect', name: 'NVLink-C2C',
-    blurb: 'The glowing lanes represent two coherent Grace-to-GPU links. Each Blackwell connection carries 450 GB/s bidirectionally, for 900 GB/s aggregate across the superchip. CPU and GPUs share one address space, making Grace’s LPDDR5X directly accessible to CUDA.',
+    blurb: 'The glowing lanes represent the coherent Grace-to-GPU links. NVIDIA specifies up to 900 GB/s of aggregate NVLink-C2C bandwidth for a GB200 superchip. The coherent connection lets the GPUs access Grace’s LPDDR5X memory without a conventional PCIe-only boundary.',
     specs: [
-      ['Per GPU', '450 GB/s bidirectional'],
-      ['Superchip aggregate', '900 GB/s bidirectional'],
+      ['Superchip aggregate', 'Up to 900 GB/s'],
       ['Coherency', 'Full cache coherence'],
-      ['vs PCIe Gen5 x16', '~7× faster'],
     ],
     sources: [
       ['NVIDIA GB200 specifications', 'https://www.nvidia.com/en-us/data-center/gb200-nvl72/'],
@@ -407,9 +402,9 @@ export const INFO = {
   },
   boardPcb: {
     tag: 'Structure', name: 'Superchip PCB',
-    blurb: 'A 22-layer HDI board carrying the superchip. Its copper layers route power planes and the ultra-dense NVLink and C2C signal pairs with tight impedance control; the module blind-mates to the tray through high-density connectors.',
+    blurb: 'A multilayer board carrying the Grace CPU, two Blackwell GPUs, memory and power delivery. It routes power plus the dense NVLink, NVLink-C2C and PCIe signals into the tray connectors. The internal layer count is not specified in NVIDIA’s public product documentation.',
     specs: [
-      ['Layers', '22-layer HDI'],
+      ['Construction', 'Multilayer high-density PCB'],
       ['Signals', 'NVLink 5, C2C, PCIe Gen5'],
       ['Mounting', 'High-density mezzanine connectors'],
     ],
@@ -445,13 +440,12 @@ export const INFO = {
   },
   hbmStack: {
     tag: 'Memory', name: 'HBM3e Stack',
-    blurb: 'Eight HBM3e packages surround the two GPU dies. Each is illustrated as an eight-high DRAM stack joined by through-silicon vias. Together they deliver up to 8 TB/s and 186 GB of usable memory per B200; the nominal physical capacity is about 24 GB per stack.',
+    blurb: 'Eight HBM3e packages surround the two GPU dies in this package view. Together they provide 186 GB of usable memory and up to 8 TB/s of bandwidth per B200. The exploded eight-high construction is illustrative because NVIDIA does not publish the exact die-by-die stack organization in the product specification.',
     specs: [
-      ['Physical capacity', '~24 GB per stack'],
-      ['Bandwidth', '~1 TB/s per stack'],
       ['GPU-visible total', '186 GB @ up to 8 TB/s'],
       ['Connection', 'TSVs on silicon interposer'],
     ],
+    sources: [['NVIDIA GB200 NVL72 specifications', 'https://www.nvidia.com/en-us/data-center/gb200-nvl72/']],
     drill: 'hbm', drillLabel: 'Explode the stack →',
   },
   interposer: {
@@ -465,10 +459,10 @@ export const INFO = {
   },
   substrate: {
     tag: 'Packaging', name: 'Package Substrate',
-    blurb: 'The green-black laminate that carries the whole assembly and fans signals out to thousands of solder balls on the underside. It also delivers the chip’s power — hundreds of watts to over a kilowatt — up into the silicon through dense via arrays.',
+    blurb: 'The green-black laminate carries the assembly, fans signals out to a dense BGA connection field and delivers power into the silicon through package routing and vias. The ball pattern shown here is illustrative.',
     specs: [
       ['Role', 'Signal fan-out + power delivery'],
-      ['Underside', 'Thousands of BGA balls'],
+      ['Underside', 'Dense BGA connection field'],
     ],
   },
   /* =========================== SWITCH TRAY LEVEL ========================== */
@@ -478,35 +472,37 @@ export const INFO = {
     specs: [
       ['Height', '1U (44.45 mm)'],
       ['ASICs', '2× NVLink 5 switch chips'],
-      ['Service', 'Tool-less slide-out'],
+      ['Management', 'On-tray BMC and NVOS'],
     ],
   },
   nvswitchPackage: {
     tag: 'Interconnect', name: 'NVLink 5 Switch ASIC',
-    blurb: 'One of the two switch chips in the tray: a reticle-class monolithic die with 50 billion transistors spent on moving data. Its 72 NVLink 5 ports sum to 7.2 TB/s of advertised bidirectional port rate, and SHARP v4 engines execute reduction math inside the network itself.',
+    blurb: 'One of the two NVLink 5 switch ASICs in a switch tray. Each ASIC exposes 72 NVLink ports, and the pair forms a 1U switch system rated at 57.6 Tb/s full duplex. SHARP engines accelerate collective operations inside the network.',
     specs: [
-      ['Transistors', '50 billion'],
-      ['Process', 'TSMC 4NP'],
-      ['Ports', '72× NVLink 5 @ 100 GB/s'],
-      ['Port-rate sum', '7.2 TB/s per chip'],
-      ['In-network compute', 'SHARP v4 (FP8)'],
+      ['Ports', '72 NVLink ports per ASIC'],
+      ['Tray configuration', '2 ASICs'],
+      ['Tray bandwidth', '57.6 Tb/s full duplex'],
+      ['In-network compute', 'SHARP collectives'],
+    ],
+    sources: [
+      ['NVIDIA DGX GB hardware guide', 'https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html'],
     ],
     drill: 'nvswitch', drillLabel: 'Inspect switch silicon →',
   },
   swColdplate: {
     tag: 'Cooling', name: 'Switch Cold Plate',
-    blurb: 'Each switch ASIC gets its own liquid cold plate, plumbed to the same rack manifolds as the compute trays. Dense SerDes running flat-out generate several hundred watts per chip — far too much for air in a 1U box.',
+    blurb: 'Each switch ASIC has a liquid cold plate connected to the rack cooling loop. The visualization shows the functional arrangement; NVIDIA’s public guide does not specify the plate material or the ASIC heat load.',
     specs: [
-      ['Heat absorbed', 'Several hundred W per ASIC'],
-      ['Material', 'Nickel-plated copper'],
+      ['Scope', 'One cold plate per ASIC'],
+      ['Cooling', 'Direct liquid cooling'],
     ],
   },
   swBackplane: {
     tag: 'Interconnect', name: 'NVLink Backplane Connectors',
     blurb: 'The dense gold connector field at the rear is where all 144 NVLink ports leave the tray. They blind-mate into the cable spine, whose cartridges fan the lanes out so that every one of the 72 GPUs reaches every switch chip.',
     specs: [
-      ['Ports', '144× NVLink 5 per tray'],
-      ['Port-rate sum', '14.4 TB/s per tray'],
+      ['Ports', '2× 72 NVLink ports per tray'],
+      ['Tray bandwidth', '57.6 Tb/s full duplex'],
       ['Mating', 'Blind-mate, floating alignment'],
     ],
   },
@@ -514,25 +510,30 @@ export const INFO = {
   /* ============================ GRACE PACKAGE LEVEL ======================= */
   graceDie: {
     tag: 'Silicon', name: 'Grace Compute Die',
-    blurb: 'A monolithic die with 72 Arm Neoverse V2 cores arranged on a mesh, tied together by NVIDIA’s Scalable Coherency Fabric — 3.2 TB/s of bisection bandwidth — and 117 MB of shared L3 cache. Built on TSMC 4N, it exists for one job: keeping two Blackwell GPUs supplied with data.',
+    blurb: 'A monolithic die with 72 Arm Neoverse V2 cores connected by NVIDIA’s Scalable Coherency Fabric, which provides 3.2 TB/s of bisection bandwidth. Current NVIDIA specifications list 114 MB of L3 cache. The raised core layout in this scene is an architectural illustration, not a published die floorplan.',
     specs: [
       ['Cores', '72× Arm Neoverse V2'],
       ['Fabric', '3.2 TB/s bisection'],
-      ['L3 cache', '117 MB'],
+      ['L3 cache', '114 MB'],
       ['Process', 'TSMC 4N'],
+    ],
+    sources: [
+      ['Inside NVIDIA Grace CPU', 'https://developer.nvidia.com/blog/inside-nvidia-grace-cpu-nvidia-amps-up-superchip-engineering-for-hpc-and-ai/'],
+      ['NVIDIA Grace CPU specifications', 'https://www.nvidia.com/en-us/data-center/grace-cpu-superchip/'],
     ],
   },
   graceC2cPhy: {
     tag: 'Interconnect', name: 'NVLink-C2C PHY',
-    blurb: 'The glowing strip along the die edge is where NVLink-C2C leaves the chip: 900 GB/s of coherent bandwidth to the two Blackwell GPUs a few centimetres away. This edge is why the GPUs can treat Grace’s 480 GB of LPDDR5X as their own memory.',
+    blurb: 'The glowing strip represents the NVLink-C2C physical interface. A GB200 superchip provides up to 900 GB/s of coherent CPU-to-GPU connectivity, allowing the Blackwell GPUs to access Grace’s LPDDR5X memory.',
     specs: [
-      ['Bandwidth', '900 GB/s bidirectional'],
+      ['Bandwidth', 'Up to 900 GB/s per superchip'],
       ['Coherency', 'Full cache coherence'],
     ],
+    sources: [['NVIDIA GB200 NVL72 specifications', 'https://www.nvidia.com/en-us/data-center/gb200-nvl72/']],
   },
   graceMemPhy: {
     tag: 'Memory', name: 'LPDDR5X Controllers & PHY',
-    blurb: 'Memory controllers and PHYs line the die edges, driving the LPDDR5X packages that sit millimetres away on the board. Short traces are the trick: they enable DDR5-class bandwidth — up to 512 GB/s — at a fraction of the I/O power.',
+    blurb: 'The cyan edge strips represent the memory-controller and PHY regions that drive nearby LPDDR5X packages. Their exact floorplan is illustrative; NVIDIA specifies up to 512 GB/s of CPU-memory bandwidth for the GB200 superchip.',
     specs: [
       ['Bandwidth', 'Up to 512 GB/s'],
       ['Memory', '480 GB LPDDR5X, ECC'],
@@ -542,20 +543,18 @@ export const INFO = {
   /* =========================== NVSWITCH PACKAGE LEVEL ===================== */
   nvswitchDie: {
     tag: 'Silicon', name: 'NVLink Switch Die',
-    blurb: 'A single monolithic die — no chiplets, because every nanosecond of switching latency is felt by 72 GPUs at once. Its 50 billion transistors implement a non-blocking crossbar, banks of SerDes, and SHARP v4 arithmetic engines that run all-reduce operations inside the switch, roughly doubling effective bandwidth for collectives.',
+    blurb: 'This illustrative silicon view represents one 72-port NVLink switch ASIC. The device routes fifth-generation NVLink traffic and supports SHARP in-network acceleration for collective operations; NVIDIA does not publish a detailed physical floorplan in the DGX GB hardware guide.',
     specs: [
-      ['Transistors', '50 billion'],
-      ['Process', 'TSMC 4NP'],
-      ['Crossbar', 'Non-blocking, 72 ports'],
-      ['SHARP v4', '3.6 TFLOPS FP8 in-network'],
+      ['Ports', '72 NVLink ports'],
+      ['Role', 'NVLink fabric switching'],
+      ['In-network compute', 'SHARP collectives'],
     ],
   },
   nvswitchPhy: {
     tag: 'Interconnect', name: 'NVLink 5 SerDes (PHY)',
-    blurb: 'The strips along the die edges are the port PHYs: high-speed SerDes driving ~200 Gb/s PAM4 lanes directly onto passive copper. Running electrical instead of optical at this speed is an engineering feat — and it is what saves ~20 kW per rack.',
+    blurb: 'The edge strips represent the high-speed physical interfaces that connect the switch ASIC to the rack’s passive-copper NVLink cable cartridges. Their placement and block layout are illustrative.',
     specs: [
-      ['Signalling', '~200 Gb/s PAM4 lanes'],
-      ['Medium', 'Passive copper, no retimers'],
+      ['Medium', 'Passive copper backplane'],
       ['Ports', '72 per chip'],
     ],
   },
@@ -563,9 +562,8 @@ export const INFO = {
   /* ============================= HBM STACK LEVEL ========================== */
   hbmDramDie: {
     tag: 'Memory', name: 'DRAM Die (Illustrative ×8)',
-    blurb: 'Each floating layer represents a DRAM die thinned to tens of microns. Eight layers form a nominal ~24 GB physical HBM3e stack; reserved capacity and repair resources mean the complete B200 exposes 186 GB usable across its eight stacks.',
+    blurb: 'Each floating layer represents a thinned DRAM die. This scene deliberately uses an illustrative eight-high stack; NVIDIA specifies 186 GB of usable HBM3e per B200 but does not publish the exact die-by-die capacity mapping in the GB200 product specifications.',
     specs: [
-      ['Nominal capacity', '~3 GB per illustrated die'],
       ['Illustrated stack', '8 DRAM layers + base die'],
       ['Thickness', 'Tens of microns each'],
     ],

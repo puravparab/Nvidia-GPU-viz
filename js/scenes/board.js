@@ -29,12 +29,12 @@ function lidTexture(label) {
     ctx.ellipse(rand() * 256, rand() * 256, 12 + rand() * 40, 8 + rand() * 26, rand() * 3, 0, Math.PI * 2);
     ctx.fill();
   }
-  ctx.fillStyle = 'rgba(120,124,128,0.55)';
-  ctx.font = '600 30px system-ui, sans-serif';
+  ctx.fillStyle = 'rgba(72,76,82,0.76)';
+  ctx.font = `600 ${label.length > 10 ? 25 : 30}px system-ui, sans-serif`;
   ctx.textAlign = 'center';
   ctx.fillText(label, 128, 118);
   ctx.font = '400 18px system-ui, sans-serif';
-  ctx.fillStyle = 'rgba(120,124,128,0.4)';
+  ctx.fillStyle = 'rgba(82,86,92,0.56)';
   ctx.fillText('T TW 2425', 128, 152);
   const tex = new THREE.CanvasTexture(cv);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -61,7 +61,7 @@ export function buildBoard() {
   /* ----- two Blackwell B200 packages (rear): bare nickel heat spreaders on
      a slim gold substrate rim, per the production board photo ----- */
   const b200LidM = new THREE.MeshStandardMaterial({
-    map: lidTexture('NVIDIA'), roughness: 0.3, metalness: 0.85,
+    map: lidTexture('NVIDIA B200'), roughness: 0.3, metalness: 0.85,
   });
   for (const gz of [-0.105, 0.105]) {
     const pkg = new THREE.Group();
@@ -73,9 +73,9 @@ export function buildBoard() {
     root.add(pkg);
   }
 
-  /* ----- Grace CPU package: same bare nickel lid, etched 894-A2 ----- */
+  /* ----- Grace CPU package: same bare nickel lid, clearly etched ----- */
   const graceLidM = new THREE.MeshStandardMaterial({
-    map: lidTexture('894-A2'), roughness: 0.3, metalness: 0.85,
+    map: lidTexture('NVIDIA GRACE'), roughness: 0.3, metalness: 0.85,
   });
   const grace = new THREE.Group();
   grace.position.set(-0.09, 0, 0);

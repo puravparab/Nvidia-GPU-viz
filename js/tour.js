@@ -16,12 +16,12 @@ export const TOUR = [
   {
     level: 'rack', info: 'switchTray',
     pos: [0.65, 1.1, 1.35], target: [0, 0.97, 0.4],
-    text: 'The nine NVLink switch trays in the middle stitch all 72 GPUs into one fabric. Any GPU can talk to any other at 1.8 TB/s — that is what makes the rack one big GPU.',
+    text: 'The nine NVLink switch trays stitch all 72 GPUs into one fabric. Each Blackwell GPU has up to 1.8 TB/s of bidirectional NVLink connectivity, giving the rack one 72-GPU scale-up domain.',
   },
   {
     level: 'switchtray', info: 'nvswitchPackage',
     pos: [0.5, 0.6, 0.8], target: [0, 0, -0.05],
-    text: 'Pop one open: two NVLink 5 switch ASICs, 50 billion transistors each. Seventy-two advertised 100 GB/s bidirectional ports sum to 7.2 TB/s per chip, with SHARP engines doing math inside the network.',
+    text: 'Pop one open: the 1U tray contains two NVLink 5 switch ASICs with 72 ports each. NVIDIA rates the tray at 57.6 Tb/s full duplex, and SHARP engines accelerate collective operations inside the network.',
   },
   {
     level: 'rack', info: 'powerShelf',
@@ -31,7 +31,7 @@ export const TOUR = [
   {
     level: 'rack', info: 'spine',
     pos: [-2.4, 1.7, -3.0], target: [0, 1.0, -0.3],
-    text: 'Around the back: the copper busbar that powers every tray, the coolant manifolds, and the NVLink spine — more than 5,000 copper cables, roughly two miles of wire.',
+    text: 'Around the back: the copper busbar that powers the rack, the liquid-cooling manifolds, and four NVLink cartridges containing more than 5,000 coaxial copper cables.',
   },
   {
     level: 'tray', info: 'computeTray',
@@ -41,7 +41,7 @@ export const TOUR = [
   {
     level: 'tray', info: 'coolantLoop',
     pos: [0.3, 0.38, -0.42], target: [0, 0.02, -0.12],
-    text: 'Coolant flows through those plates and out through dripless quick-disconnects at the rear. A central fan wall still cools storage, management, and other lower-power components.',
+    text: 'Coolant flows through those plates and connects to the rack manifolds at the rear. A central fan wall still cools storage, management, and other lower-power components.',
   },
   {
     level: 'tray', info: 'connectx',
@@ -56,12 +56,12 @@ export const TOUR = [
   {
     level: 'grace', info: 'graceDie',
     pos: [0.75, 0.95, 1.2], target: [0, 0.02, 0],
-    text: 'The Grace die up close: 72 identical Neoverse V2 core tiles on a mesh, 117 MB of L3, and PHY strips on the edges where 900 GB/s leaves for the GPUs.',
+    text: 'The Grace die up close: 72 Neoverse V2 cores connected by NVIDIA’s Scalable Coherency Fabric, with 114 MB of L3 cache. The raised tile layout is an architectural illustration, not a published floorplan.',
   },
   {
     level: 'board', info: 'c2cLink',
     pos: [0.05, 0.32, 0.3], target: [0.05, 0, 0],
-    text: 'The glowing lanes are NVLink-C2C: 450 GB/s to each GPU, 900 GB/s aggregate, with cache coherence across the Grace and Blackwell memory domains.',
+    text: 'The glowing lanes represent NVLink-C2C: up to 900 GB/s of aggregate coherent connectivity across the Grace CPU and the two Blackwell GPUs.',
   },
   {
     level: 'board', info: 'b200Package',
@@ -76,12 +76,12 @@ export const TOUR = [
   {
     level: 'chip', info: 'nvhbi',
     pos: [0.05, 0.75, 0.75], target: [0, 0.07, 0],
-    text: 'The green seam is NV-HBI, a 10 TB/s die-to-die bridge. It is fast enough that software sees one giant GPU, not two chiplets.',
+    text: 'The green seam represents NV-HBI, the 10 TB/s die-to-die link that lets software see the two Blackwell dies as one unified GPU.',
   },
   {
     level: 'chip', info: 'hbmStack',
     pos: [1.15, 0.8, 0.95], target: [0.35, 0.08, 0],
-    text: 'Eight HBM3e towers feed the GPU up to 8 TB/s of memory bandwidth and expose 186 GB of usable capacity. Seventy-two B200 packages fill the rack you started at.',
+    text: 'Eight HBM3e packages feed the GPU with up to 8 TB/s of memory bandwidth and expose 186 GB of usable capacity. Seventy-two B200 packages fill the rack you started at.',
   },
   {
     level: 'hbm', info: 'hbmTsv',

@@ -1,42 +1,6 @@
 import * as THREE from 'three';
 import { mat, glowMat, box, slab, mark, M, GREEN } from '../common.js';
 
-/** Procedural die texture for Grace: a uniform mesh of 72 CPU core tiles
- *  with an L3/fabric band through the middle. */
-function graceDieTexture() {
-  const cv = document.createElement('canvas');
-  cv.width = 512; cv.height = 448;
-  const ctx = cv.getContext('2d');
-  ctx.fillStyle = '#111722';
-  ctx.fillRect(0, 0, 512, 448);
-  let s = 41;
-  const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
-  // 9 x 8 mesh of core tiles — orange cores + green L3 slices with grey
-  // coherency-fabric nodes, per NVIDIA's Grace die diagram
-  const cols = 9, rows = 8, gw = 512 / cols, gh = 448 / rows;
-  for (let i = 0; i < cols; i++) {
-    for (let j = 0; j < rows; j++) {
-      const isCore = (i + j) % 2 === 0;
-      ctx.fillStyle = isCore
-        ? `rgb(${150 + Math.floor(rand() * 30)},${92 + Math.floor(rand() * 16)},20)`
-        : `rgb(${52 + Math.floor(rand() * 14)},${112 + Math.floor(rand() * 22)},34)`;
-      ctx.fillRect(i * gw + 4, j * gh + 4, gw - 8, gh - 8);
-      // fabric node at each tile corner
-      ctx.fillStyle = 'rgb(96,100,104)';
-      ctx.fillRect(i * gw - 4, j * gh - 4, 9, 9);
-    }
-  }
-  ctx.globalAlpha = 0.35;
-  ctx.strokeStyle = '#7a6a3a';
-  for (let x = 0; x < 512; x += Math.floor(gw)) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 448); ctx.stroke(); }
-  for (let y = 0; y < 448; y += Math.floor(gh)) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(512, y); ctx.stroke(); }
-  ctx.globalAlpha = 1;
-  const tex = new THREE.CanvasTexture(cv);
-  tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 4;
-  return tex;
-}
-
 /**
  * Grace CPU package, macro view: substrate + monolithic 72-core die.
  * (The 480 GB of LPDDR5X lives on the board around the package, not on it.)
@@ -46,33 +10,54 @@ export function buildGrace() {
 
   /* ----- substrate ----- */
   const sub = new THREE.Group();
-  sub.add(slab(0.95, 0.04, 0.95, 0.02, M.substrate(), 0, 0, 0));
+  sub.add(slab(1.0, 0.04, 0.92, 0.025, M.substrate(), 0, 0, 0));
+  sub.add(slab(0.9, 0.012, 0.82, 0.018, mat(0x1b2524, 0.52, 0.55), 0, 0.035, 0));
   const ballM = mat(0x8a8f95, 0.35, 0.9);
-  for (let i = 0; i < 20; i++) {
-    sub.add(box(0.012, 0.008, 0.012, ballM, -0.44 + i * 0.046, -0.002, 0.462));
+  for (let i = 0; i < 22; i++) {
+    const x = -0.46 + i * 0.044;
+    sub.add(box(0.011, 0.008, 0.011, ballM, x, -0.002, 0.445));
+    sub.add(box(0.011, 0.008, 0.011, ballM, x, -0.002, -0.445));
   }
   mark(sub, 'substrate');
   root.add(sub);
 
   /* ----- monolithic compute die ----- */
-  const tex = graceDieTexture();
-  const dieM = new THREE.MeshStandardMaterial({
-    map: tex, roughness: 0.28, metalness: 0.75,
-    emissive: 0xffffff, emissiveIntensity: 0.14, emissiveMap: tex,
-  });
-  const die = box(0.62, 0.022, 0.52, dieM, 0, 0.051, -0.03);
+  const dieM = mat(0x111c2a, 0.26, 0.78, { emissive: 0x07111b, emissiveIntensity: 0.4 });
+  const die = box(0.68, 0.024, 0.54, dieM, 0, 0.059, -0.025);
   mark(die, 'graceDie');
   root.add(die);
 
+  /* ----- 72 cores + distributed cache on the SCF mesh ----- */
+  const architecture = new THREE.Group();
+  const coreM = mat(0xb16b1b, 0.32, 0.72, { emissive: 0x4c2105, emissiveIntensity: 0.22 });
+  const cacheM = mat(0x3b812d, 0.34, 0.62, { emissive: 0x183d14, emissiveIntensity: 0.28 });
+  const meshM = glowMat(0x76b900, 0.45);
+  const nodeM = mat(0xa9b2b7, 0.25, 0.82);
+  const cols = 12, rows = 6, sx = 0.05, sz = 0.07;
+  for (let i = 0; i < cols; i++) architecture.add(box(0.003, 0.002, 0.43, meshM, (i - 5.5) * sx, 0.073, -0.025));
+  for (let j = 0; j < rows; j++) architecture.add(box(0.59, 0.002, 0.003, meshM, 0, 0.073, -0.025 + (j - 2.5) * sz));
+  for (let j = 0; j < rows; j++) {
+    for (let i = 0; i < cols; i++) {
+      const x = (i - 5.5) * sx, z = -0.025 + (j - 2.5) * sz;
+      architecture.add(box(0.032, 0.008, 0.047, coreM, x - 0.004, 0.078, z));
+      architecture.add(box(0.006, 0.009, 0.047, cacheM, x + 0.018, 0.0785, z));
+    }
+  }
+  for (const [x, z] of [[-0.15, -0.095], [0.15, -0.095], [-0.15, 0.045], [0.15, 0.045]]) {
+    architecture.add(box(0.018, 0.012, 0.018, nodeM, x, 0.081, z));
+  }
+  mark(architecture, 'graceDie');
+  root.add(architecture);
+
   /* ----- PHY strips on the die edges ----- */
   // NVLink-C2C along the front edge (the 900 GB/s exit toward the GPUs)
-  const c2c = box(0.62, 0.023, 0.035, glowMat(GREEN, 0.85), 0, 0.051, 0.25);
+  const c2c = box(0.58, 0.025, 0.03, glowMat(GREEN, 0.9), 0, 0.06, 0.26);
   mark(c2c, 'graceC2cPhy');
   root.add(c2c);
   // LPDDR5X controllers/PHY along both side edges (cyan in NVIDIA's diagram)
   const phyM = mat(0x2a7f8c, 0.35, 0.7, { emissive: 0x14444e, emissiveIntensity: 0.25 });
   for (const sx of [-1, 1]) {
-    const p = box(0.03, 0.023, 0.52, phyM, sx * 0.335, 0.051, -0.03);
+    const p = box(0.027, 0.025, 0.46, phyM, sx * 0.354, 0.06, -0.025);
     mark(p, 'graceMemPhy');
     root.add(p);
   }
@@ -83,12 +68,13 @@ export function buildGrace() {
   const capM2 = mat(0x4c4841, 0.45, 0.5);
   let s = 13;
   const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
-  for (let i = 0; i < 90; i++) {
-    const edge = Math.floor(rand() * 4);
+  for (let i = 0; i < 112; i++) {
+    const edge = i % 4;
+    const slot = Math.floor(i / 4);
     let x, z;
-    if (edge < 2) { x = (rand() - 0.5) * 0.8; z = (edge === 0 ? -1 : 1) * (0.36 + rand() * 0.06); }
-    else { x = (edge === 2 ? -1 : 1) * (0.41 + rand() * 0.035); z = (rand() - 0.5) * 0.6; }
-    caps.add(box(0.013, 0.006, 0.008, rand() > 0.5 ? capM : capM2, x, 0.044, z));
+    if (edge < 2) { x = -0.405 + slot * 0.03; z = (edge === 0 ? -1 : 1) * 0.36; }
+    else { x = (edge === 2 ? -1 : 1) * 0.43; z = -0.304 + slot * 0.0225; }
+    caps.add(box(0.014, 0.006, 0.008, rand() > 0.5 ? capM : capM2, x, 0.052, z));
   }
   mark(caps, 'capacitors');
   root.add(caps);
@@ -108,10 +94,13 @@ export function buildGrace() {
   labelTex.colorSpace = THREE.SRGBColorSpace;
   const label = new THREE.Mesh(
     new THREE.PlaneGeometry(0.4, 0.1),
-    new THREE.MeshBasicMaterial({ map: labelTex, transparent: true })
+    new THREE.MeshBasicMaterial({
+      map: labelTex, transparent: true, depthWrite: false,
+      polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+    })
   );
   label.rotation.x = -Math.PI / 2;
-  label.position.set(-0.24, 0.0415, 0.38);
+  label.position.set(-0.26, 0.049, 0.39);
   root.add(label);
 
   /* ----- shadow disc ----- */

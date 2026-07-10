@@ -69,10 +69,13 @@ export function buildTray() {
       b.add(box(0.19, 0.006, 0.034, mat(0x0b0c0d, 0.5, 0.4), 0, 0.026, -0.135));
       const face = new THREE.Mesh(
         new THREE.PlaneGeometry(0.19, 0.034),
-        new THREE.MeshBasicMaterial({ map: badgeTex, transparent: false })
+        new THREE.MeshBasicMaterial({
+          map: badgeTex, transparent: false,
+          polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+        })
       );
       face.rotation.x = -Math.PI / 2;
-      face.position.set(0, 0.0295, -0.135);
+      face.position.set(0, 0.0305, -0.135);
       b.add(face);
     }
 
