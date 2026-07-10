@@ -50,8 +50,8 @@ export const TOUR = [
   },
   {
     level: 'board', info: 'graceCpu',
-    pos: [0.12, 0.3, 0.38], target: [0, 0, 0.08],
-    text: 'The bare GB200 superchip board. In front sits the Grace CPU: 72 Arm cores ringed by 480 GB of LPDDR5X memory.',
+    pos: [-0.07, 0.33, 0.38], target: [-0.07, 0, 0],
+    text: 'The bare GB200 superchip board. Under the silver lid on the centreline sits the Grace CPU: 72 Arm cores flanked by banks of LPDDR5X memory.',
   },
   {
     level: 'grace', info: 'graceDie',
@@ -60,13 +60,13 @@ export const TOUR = [
   },
   {
     level: 'board', info: 'c2cLink',
-    pos: [0.28, 0.3, 0.22], target: [0.06, 0, 0.02],
+    pos: [0.05, 0.32, 0.3], target: [0.05, 0, 0],
     text: 'The glowing lanes are NVLink-C2C: 900 GB/s of cache-coherent bandwidth that fuses CPU and GPU memory into a single pool.',
   },
   {
     level: 'board', info: 'b200Package',
-    pos: [0.3, 0.22, 0.1], target: [0.17, 0, -0.05],
-    text: 'And the stars of the show: two Blackwell B200 packages. Let’s zoom into one.',
+    pos: [0.38, 0.24, 0.28], target: [0.16, 0, 0.02],
+    text: 'And the stars of the show: two Blackwell B200 packages side by side at the rear edge, next to the blind-mate connectors. Let’s zoom into one.',
   },
   {
     level: 'chip', info: 'gpuDie',

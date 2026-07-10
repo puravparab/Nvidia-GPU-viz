@@ -66,7 +66,9 @@ npx wrangler pages deploy   # project name & output dir come from wrangler.jsonc
 Geometry and specs are modeled after public NVIDIA documentation and teardowns of the
 GB200 NVL72 / DGX GB200: 72 Blackwell GPUs + 36 Grace CPUs in one NVLink domain,
 1.44 exaFLOPS FP4, 13.4 TB HBM3e, 130 TB/s aggregate NVLink bandwidth, ~5,000-cable
-copper spine, and eight 33 kW power shelves feeding a 48 V DC busbar. It is an
+copper spine, and eight 33 kW power shelves feeding a 48 V DC busbar. Component
+layouts were cross-checked against photos of NVIDIA's GTC display units
+(ServeTheHome's DGX GB200 NVL72 coverage) and NVIDIA press imagery. It is an
 illustrative model, not CAD data.
 
 ## Credits

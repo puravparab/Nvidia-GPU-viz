@@ -1,5 +1,5 @@
 import * as THREE from 'three';
-import { mat, glowMat, box, cyl, led, mark, ventTexture, M, GREEN } from '../common.js';
+import { mat, glowMat, box, cyl, led, tube, mark, ventTexture, M, GREEN } from '../common.js';
 
 const U = 0.04445;           // 1 rack unit in metres
 const IW = 0.537;            // tray width
@@ -14,44 +14,45 @@ function computeTrayTemplate() {
   const g = new THREE.Group();
   const fz = FRONT + 0.006;
 
-  // body + faceplate
+  // body + faceplate: full perforated mesh face (per the STH front photo)
   g.add(box(IW, U * 0.92, TD * 0.97, M.panelDark(), 0, 0, 0));
   g.add(box(IW, U * 0.96, 0.012, M.panelMid(), 0, 0, FRONT));
+  const vt = ventTexture(512, 64, '#141618', '#070808');
+  vt.repeat.set(8, 1);
+  g.add(box(IW * 0.94, U * 0.82, 0.002, new THREE.MeshStandardMaterial({ map: vt, roughness: 0.7, metalness: 0.4 }), 0, 0, fz - 0.001));
 
-  // side handles / ears
-  g.add(box(0.014, U * 0.8, 0.018, M.steel(), -IW / 2 + 0.012, 0, fz));
-  g.add(box(0.014, U * 0.8, 0.018, M.steel(), IW / 2 - 0.012, 0, fz));
+  // left: stacked OSFP cage pair
+  for (const y of [0.0085, -0.0085]) {
+    g.add(box(0.036, 0.012, 0.010, M.steel(), -0.225, y, fz));
+    g.add(box(0.03, 0.008, 0.004, mat(0x050505, 0.9, 0.1), -0.225, y, fz + 0.006));
+  }
 
-  // 4x E1.S NVMe drives (left)
+  // 4x E1.S NVMe latches
   for (let i = 0; i < 4; i++) {
-    const x = -0.215 + i * 0.028;
-    g.add(box(0.02, U * 0.7, 0.008, mat(0x25282c, 0.4, 0.7), x, 0, fz));
-    g.add(led(0.0022, GREEN, x + 0.006, U * 0.24, fz + 0.005));
+    const x = -0.165 + i * 0.03;
+    g.add(box(0.018, U * 0.68, 0.008, mat(0x25282c, 0.4, 0.7), x, 0, fz));
+    g.add(box(0.012, 0.005, 0.004, M.steel(), x, -U * 0.2, fz + 0.005));
   }
 
-  // 4x OSFP cages (centre) — ConnectX-7
-  for (let i = 0; i < 4; i++) {
-    const x = -0.075 + i * 0.042;
-    g.add(box(0.034, 0.0135, 0.010, M.steel(), x, 0.004, fz));
-    g.add(box(0.028, 0.0085, 0.004, mat(0x050505, 0.9, 0.1), x, 0.004, fz + 0.006));
-  }
+  // centre: management cluster (RJ45s + USB, silver like the photo)
+  g.add(box(0.013, 0.011, 0.008, mat(0xd8dde2, 0.35, 0.8), -0.02, 0.002, fz));
+  g.add(box(0.013, 0.011, 0.008, mat(0xd8dde2, 0.35, 0.8), 0.02, 0.002, fz));
+  g.add(box(0.014, 0.006, 0.006, M.steel(), 0, -0.001, fz));
 
-  // 2x QSFP (BlueField-3) + mgmt port (right)
-  for (let i = 0; i < 2; i++) {
-    const x = 0.13 + i * 0.038;
-    g.add(box(0.03, 0.012, 0.010, M.steel(), x, 0.004, fz));
-    g.add(box(0.024, 0.0075, 0.004, mat(0x050505, 0.9, 0.1), x, 0.004, fz + 0.006));
+  // right: stacked InfiniBand OSFP pair + mgmt RJ45 + far-right cage pair
+  for (const y of [0.0085, -0.0085]) {
+    g.add(box(0.036, 0.012, 0.010, M.steel(), 0.085, y, fz));
+    g.add(box(0.03, 0.008, 0.004, mat(0x0a1c30, 0.7, 0.2), 0.085, y, fz + 0.006));
   }
-  g.add(box(0.016, 0.012, 0.008, mat(0x2f3338, 0.5, 0.5), 0.205, 0.004, fz));
+  g.add(box(0.013, 0.011, 0.008, mat(0x2f6ea8, 0.4, 0.5), 0.14, 0.002, fz));
+  for (const x of [0.19, 0.23]) {
+    g.add(box(0.032, 0.012, 0.010, M.steel(), x, 0.002, fz));
+    g.add(box(0.026, 0.008, 0.004, mat(0x050505, 0.9, 0.1), x, 0.002, fz + 0.006));
+  }
 
   // status LEDs
-  g.add(led(0.0028, GREEN, 0.24, 0.008, fz + 0.004));
-  g.add(led(0.002, 0x2299ff, 0.24, -0.006, fz + 0.004));
-
-  // lower vent strip
-  const vt = ventTexture();
-  vt.repeat.set(6, 1);
-  g.add(box(0.44, 0.011, 0.002, new THREE.MeshStandardMaterial({ map: vt, roughness: 0.7, metalness: 0.4 }), -0.02, -U * 0.28, fz + 0.002));
+  g.add(led(0.0028, GREEN, 0.165, 0.009, fz + 0.004));
+  g.add(led(0.002, 0x2299ff, 0.165, -0.004, fz + 0.004));
   return g;
 }
 
@@ -134,11 +135,14 @@ export function buildRack() {
   };
   const infoKeys = { compute: 'computeTray', switch: 'switchTray', power: 'powerShelf', mgmt: 'mgmtSwitch' };
 
+  const goldM = mat(0xa8894f, 0.42, 0.85);
   let y = yTop;
   let computeIdx = 0;
   for (const [kind, count] of plan) {
     for (let i = 0; i < count; i++) {
       y -= U;
+      // gold separator bar under each slot — the DGX GB200's signature trim
+      root.add(box(IW, 0.0035, 0.016, goldM, 0, y + 0.002, FRONT + 0.004));
       if (kind === 'blank') {
         const b = box(IW, U * 0.9, 0.008, mat(0x0b0c0d, 0.6, 0.5), 0, y + U / 2, FRONT);
         mark(b, 'rackFrame');
@@ -168,9 +172,13 @@ export function buildRack() {
   const sideM = mat(0x0a0b0c, 0.5, 0.7);
   frame.add(box(0.012, fh - plinth, TD + 0.16, sideM, -px - 0.02, plinth + (fh - plinth) / 2, (pzF + pzR) / 2 + 0.02));
   frame.add(box(0.012, fh - plinth, TD + 0.16, sideM, px + 0.02, plinth + (fh - plinth) / 2, (pzF + pzR) / 2 + 0.02));
-  // interior green accent strips (NVIDIA-style glow along the bays)
-  frame.add(box(0.004, H, 0.004, glowMat(GREEN, 1.1), -IW / 2 - 0.006, plinth + topPad + H / 2, FRONT + 0.012));
-  frame.add(box(0.004, H, 0.004, glowMat(GREEN, 1.1), IW / 2 + 0.006, plinth + topPad + H / 2, FRONT + 0.012));
+  // gold side rails framing the tray bays (per the STH front photo)
+  frame.add(box(0.014, H + 0.03, 0.02, goldM, -IW / 2 - 0.012, plinth + topPad + H / 2, FRONT + 0.006));
+  frame.add(box(0.014, H + 0.03, 0.02, goldM, IW / 2 + 0.012, plinth + topPad + H / 2, FRONT + 0.006));
+  // rounded gold bezel bar with black NVIDIA badge insert at the top
+  frame.add(box(IW + 0.04, 0.035, 0.024, goldM, 0, yTop + 0.012, FRONT + 0.004));
+  frame.add(box(IW - 0.05, 0.024, 0.006, mat(0x0c0d0e, 0.5, 0.5), 0, yTop + 0.012, FRONT + 0.018));
+  frame.add(box(0.05, 0.006, 0.002, glowMat(GREEN, 0.9), 0.16, yTop + 0.012, FRONT + 0.022));
   mark(frame, 'rackFrame');
   root.add(frame);
 
@@ -184,22 +192,42 @@ export function buildRack() {
   mark(bus, 'busbar');
   rear.add(bus);
 
-  // NVLink cable spine — cartridge + cable bundles behind the switch bay
+  // NVLink cable spine — central perforated cartridge column (per the STH
+  // rear photo): four mesh-faced sections, a centre seam, gold edge rails
   const spine = new THREE.Group();
   const spineH = 28 * U; // spans compute + switch bays
   const spineY = plinth + topPad + H - (5 + 1 + 14) * U; // roughly centred on switch bay
-  // four stacked NVLink cartridges with visible gaps between sections
-  const cartM = mat(0x101113, 0.55, 0.55);
-  const cartH = spineH / 4 - 0.012;
+  const meshTex = ventTexture(256, 256, '#131416', '#060707');
+  meshTex.repeat.set(3, 8);
+  const cartH = spineH / 4 - 0.008;
   for (let i = 0; i < 4; i++) {
-    spine.add(box(0.34, cartH, 0.05, cartM, 0, spineY + (i - 1.5) * (spineH / 4), -TD / 2 - 0.075));
+    const cy = spineY + (i - 1.5) * (spineH / 4);
+    spine.add(box(0.30, cartH, 0.05, mat(0x101113, 0.55, 0.55), 0, cy, -TD / 2 - 0.075));
+    spine.add(box(0.29, cartH - 0.01, 0.004, new THREE.MeshStandardMaterial({ map: meshTex.clone(), roughness: 0.65, metalness: 0.45 }), 0, cy, -TD / 2 - 0.102));
   }
+  // centre seam + gold trim rails on both edges of the column
+  spine.add(box(0.006, spineH, 0.006, mat(0x08090a, 0.6, 0.4), 0, spineY, -TD / 2 - 0.104));
+  spine.add(box(0.012, spineH + 0.02, 0.02, goldM, -0.158, spineY, -TD / 2 - 0.095));
+  spine.add(box(0.012, spineH + 0.02, 0.02, goldM, 0.158, spineY, -TD / 2 - 0.095));
+  // dark cable mass just visible behind the mesh
   const cableM = mat(0x1c1e22, 0.8, 0.25);
-  for (let i = 0; i < 10; i++) {
-    spine.add(cyl(0.012, 0.012, spineH * 0.96, cableM, -0.145 + i * 0.032, spineY, -TD / 2 - 0.108, 10));
+  for (let i = 0; i < 8; i++) {
+    spine.add(cyl(0.014, 0.014, spineH * 0.96, cableM, -0.125 + i * 0.036, spineY, -TD / 2 - 0.112, 8));
   }
   mark(spine, 'spine');
   rear.add(spine);
+
+  // braided steel supply hoses sweeping from the plinth into the manifolds
+  const hoseM = mat(0x9aa0a6, 0.45, 0.85);
+  for (const hx of [-0.09, 0.09]) {
+    const hose = tube([
+      [hx, plinth + 0.02, -TD / 2 + 0.05],
+      [hx * 1.8, plinth + 0.1, -TD / 2 - 0.1],
+      [hx * 2.6, plinth + 0.32, -TD / 2 - 0.06],
+    ], 0.026, hoseM, 24);
+    mark(hose, 'manifold');
+    rear.add(hose);
+  }
 
   // coolant manifolds: blue supply / red return verticals + per-tray stubs
   const manifold = new THREE.Group();

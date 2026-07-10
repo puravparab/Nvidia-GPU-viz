@@ -282,7 +282,7 @@ export const INFO = {
   },
   lpddr: {
     tag: 'Memory', name: 'LPDDR5X Memory',
-    blurb: 'A ring of LPDDR5X packages surrounds the Grace die — 480 GB of ECC memory at a fraction of the power an equivalent DDR5 DIMM setup would draw. This is the “capacity tier”: huge models spill from GPU HBM into this pool over NVLink-C2C.',
+    blurb: 'Two banks of LPDDR5X packages flank the Grace package — 480 GB of ECC memory at a fraction of the power an equivalent DDR5 DIMM setup would draw. This is the “capacity tier”: huge models spill from GPU HBM into this pool over NVLink-C2C.',
     specs: [
       ['Capacity', '480 GB per Grace'],
       ['Bandwidth', 'Up to 512 GB/s'],

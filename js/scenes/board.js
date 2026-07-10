@@ -1,81 +1,75 @@
 import * as THREE from 'three';
-import { mat, glowMat, box, cyl, slab, mark, dieTexture, M, GREEN } from '../common.js';
+import { mat, box, cyl, slab, mark, M, GREEN } from '../common.js';
 
 /**
- * Bare GB200 "Bianca" superchip board: one Grace CPU (front) + two Blackwell
- * B200 GPUs (rear), cold plates removed so the silicon is visible.
- * Rear (NVLink edge) = -Z, long axis = X.
+ * Bare GB200 "Bianca" superchip board, laid out per NVIDIA's GTC display unit:
+ * long axis = X, rear blind-mate edge (orange connectors) = +X. The two
+ * Blackwell GPUs sit side-by-side across the width at the rear, Grace sits
+ * on the centerline behind them, and the LPDDR5X packages flank Grace in two
+ * 2×4 banks along the board's long edges. All packages wear silver lids —
+ * drill into them to see the bare silicon.
  */
 export function buildBoard() {
   const root = new THREE.Group();
   const W = 0.66, D = 0.34;
 
+  const lidM = mat(0xc8ccd2, 0.32, 0.9);
+  const lidRimM = mat(0x9ba1a8, 0.4, 0.85);
+  const pkgSubM = mat(0x14161a, 0.5, 0.4);
+
   /* ----- PCB ----- */
   const pcb = new THREE.Group();
-  pcb.add(box(W, 0.006, D, M.pcb(), 0, -0.003, 0));
-  // mounting holes
-  for (const [hx, hz] of [[-0.3, -0.14], [0.3, -0.14], [-0.3, 0.14], [0.3, 0.14], [0, 0.15]]) {
-    pcb.add(cyl(0.005, 0.005, 0.008, M.steel(), hx, 0, hz, 10));
+  pcb.add(box(W, 0.006, D, M.pcbDark(), 0, -0.003, 0));
+  // gold-ringed standoffs (from the photo: corners + mid-board)
+  for (const [hx, hz] of [[-0.31, -0.15], [-0.31, 0.15], [0.30, -0.155], [0.30, 0.155], [-0.05, -0.15], [-0.05, 0.15], [0.02, 0]]) {
+    pcb.add(cyl(0.006, 0.006, 0.009, M.gold(), hx, 0.002, hz, 10));
   }
+  // two dark elastomer pads (left-centre in the photo)
+  pcb.add(box(0.05, 0.006, 0.05, M.rubber(), -0.21, 0.004, 0.015));
+  pcb.add(box(0.05, 0.006, 0.05, M.rubber(), -0.15, 0.004, 0.015));
   mark(pcb, 'boardPcb');
   root.add(pcb);
 
-  const dieTex = dieTexture(512, 512, '#10141d', 11);
-  const dieMat = new THREE.MeshStandardMaterial({
-    map: dieTex, roughness: 0.3, metalness: 0.75,
-    emissive: 0x2a3550, emissiveIntensity: 0.22, emissiveMap: dieTex,
-  });
-
-  /* ----- two Blackwell B200 packages (rear half) ----- */
-  for (const gx of [-0.17, 0.17]) {
+  /* ----- two Blackwell B200 packages: side-by-side across the rear ----- */
+  for (const gz of [-0.088, 0.088]) {
     const pkg = new THREE.Group();
-    pkg.position.set(gx, 0, -0.055);
-    // substrate + interposer
-    pkg.add(slab(0.115, 0.006, 0.115, 0.004, M.substrate(), 0, 0, 0));
-    pkg.add(box(0.106, 0.003, 0.076, M.silicon(), 0, 0.0075, 0));
-    // two compute dies with the NV-HBI seam
-    pkg.add(box(0.026, 0.004, 0.05, dieMat, -0.0145, 0.011, 0));
-    pkg.add(box(0.026, 0.004, 0.05, dieMat, 0.0145, 0.011, 0));
-    pkg.add(box(0.0035, 0.0042, 0.05, glowMat(GREEN, 0.9), 0, 0.011, 0));
-    // 8 HBM3e stacks, 2×2 per side — all within the interposer footprint
-    for (const sx of [-1, 1]) {
-      for (let i = 0; i < 2; i++) {
-        for (let j = 0; j < 2; j++) {
-          pkg.add(box(0.012, 0.006, 0.024, M.hbm(), sx * (0.034 + i * 0.0125), 0.012, -0.0145 + j * 0.029));
-        }
-      }
-    }
+    pkg.position.set(0.16, 0, gz);
+    pkg.add(slab(0.115, 0.006, 0.115, 0.004, pkgSubM, 0, 0, 0));
+    // silver lid with a raised centre (like the photo's stepped IHS)
+    pkg.add(slab(0.104, 0.005, 0.104, 0.004, lidRimM, 0, 0.006, 0));
+    pkg.add(slab(0.092, 0.004, 0.092, 0.003, lidM, 0, 0.011, 0));
     mark(pkg, 'b200Package');
     root.add(pkg);
   }
 
-  /* ----- Grace CPU (front centre) ----- */
+  /* ----- Grace CPU package: centreline, behind the GPUs ----- */
   const grace = new THREE.Group();
-  grace.position.set(0, 0, 0.095);
-  grace.add(slab(0.1, 0.005, 0.1, 0.004, M.substrate(), 0, 0, 0));
-  grace.add(box(0.056, 0.004, 0.062, dieMat, 0, 0.008, 0));
+  grace.position.set(-0.07, 0, 0);
+  grace.add(slab(0.1, 0.005, 0.1, 0.004, pkgSubM, 0, 0, 0));
+  grace.add(slab(0.088, 0.005, 0.088, 0.004, lidRimM, 0, 0.005, 0));
+  grace.add(slab(0.076, 0.004, 0.076, 0.003, lidM, 0, 0.01, 0));
   mark(grace, 'graceCpu');
   root.add(grace);
 
-  // 16 LPDDR5X packages around Grace
+  /* ----- LPDDR5X: two 2×4 banks flanking Grace along the long edges ----- */
   const lp = new THREE.Group();
-  for (const sx of [-1, 1]) {
-    for (let i = 0; i < 5; i++) {
-      lp.add(box(0.028, 0.0045, 0.02, M.chipBlack(), sx * 0.085, 0.005, 0.035 + i * 0.028));
-    }
-    for (let i = 0; i < 3; i++) {
-      lp.add(box(0.02, 0.0045, 0.028, M.chipBlack(), sx * (0.02 + i * 0.03), 0.005, 0.163));
+  for (const sz of [-1, 1]) {
+    for (let r = 0; r < 2; r++) {
+      for (let c = 0; c < 4; c++) {
+        lp.add(box(0.032, 0.005, 0.022, M.chipBlack(),
+          -0.155 + c * 0.041, 0.006, sz * (0.106 + r * 0.028)));
+      }
     }
   }
   mark(lp, 'lpddr');
   root.add(lp);
 
-  /* ----- NVLink-C2C glowing lanes: Grace ↔ each GPU ----- */
+  /* ----- NVLink-C2C lanes: Grace ↔ each GPU (stylised; invisible in reality) ----- */
   const c2c = new THREE.Group();
-  const laneGeo = new THREE.PlaneGeometry(0.155, 0.0035);
+  const laneGeo = new THREE.PlaneGeometry(0.16, 0.0035);
   laneGeo.rotateX(-Math.PI / 2); // lie flat in XZ, length along X
-  for (const gx of [-0.17, 0.17]) {
-    const x0 = gx * 0.28, z0 = 0.075, x1 = gx, z1 = -0.02;
+  for (const gz of [-0.088, 0.088]) {
+    const x0 = -0.02, z0 = 0, x1 = 0.115, z1 = gz * 0.85;
     const yaw = Math.atan2(-(z1 - z0), x1 - x0);
     for (let i = 0; i < 5; i++) {
       const t = i / 4 - 0.5;
@@ -83,7 +77,7 @@ export function buildBoard() {
         laneGeo,
         new THREE.MeshBasicMaterial({ color: GREEN, transparent: true, opacity: 0.75 })
       );
-      lane.position.set((x0 + x1) / 2 + t * 0.02, 0.004, (z0 + z1) / 2 + t * 0.008);
+      lane.position.set((x0 + x1) / 2 - t * 0.012 * Math.sign(gz), 0.011, (z0 + z1) / 2 + t * 0.014);
       lane.rotation.y = yaw;
       c2c.add(lane);
     }
@@ -91,42 +85,52 @@ export function buildBoard() {
   mark(c2c, 'c2cLink');
   root.add(c2c);
 
-  /* ----- VRM banks: rows of inductors + power stages ----- */
+  /* ----- VRM tile fields: dense grids hugging the GPU packages ----- */
   const vrm = new THREE.Group();
-  const indM = mat(0x3a3f45, 0.5, 0.6);
-  const capM = mat(0x6b6355, 0.45, 0.5);
-  for (const vx of [-0.29, 0.29]) {
-    for (let i = 0; i < 8; i++) {
-      vrm.add(box(0.02, 0.011, 0.02, indM, vx, 0.008, -0.135 + i * 0.038));
-      vrm.add(box(0.008, 0.006, 0.02, capM, vx + (vx > 0 ? -0.02 : 0.02), 0.005, -0.135 + i * 0.038));
-    }
-  }
-  // VRM strip between the GPU packages
-  for (let i = 0; i < 5; i++) {
-    vrm.add(box(0.018, 0.01, 0.018, indM, 0, 0.008, -0.15 + i * 0.045));
-  }
+  const tileM = mat(0x3a3f45, 0.5, 0.6);
+  const tileM2 = mat(0x2c3036, 0.55, 0.5);
+  let s = 3;
+  const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  const tileAt = (x, z) => vrm.add(box(0.016, 0.008, 0.016, rand() > 0.4 ? tileM : tileM2, x, 0.006, z));
+  // column between Grace and the GPUs
+  for (let i = 0; i < 4; i++) for (let j = 0; j < 12; j++) tileAt(0.035 + i * 0.021, -0.125 + j * 0.023);
+  // strips outboard of each GPU and along the rear edge
+  for (let j = 0; j < 6; j++) { tileAt(0.24, -0.155 + j * 0.024); tileAt(0.24, 0.035 + j * 0.024); }
+  for (let i = 0; i < 3; i++) for (let j = 0; j < 4; j++) tileAt(0.10 + i * 0.021, -0.02 + j * 0.012 - 0.012);
   mark(vrm, 'vrm');
   root.add(vrm);
 
-  /* ----- NVLink edge connectors (rear) ----- */
+  /* ----- rear blind-mate connectors (+X short edge, orange like the photo) ----- */
   const nvl = new THREE.Group();
-  for (let i = 0; i < 3; i++) {
-    nvl.add(box(0.14, 0.018, 0.022, M.gold(), -0.18 + i * 0.18, 0.011, -D / 2 + 0.005));
-    nvl.add(box(0.13, 0.008, 0.01, mat(0x0c0c0c, 0.6, 0.4), -0.18 + i * 0.18, 0.011, -D / 2 + 0.018));
+  const orangeM = mat(0xc9761c, 0.5, 0.3);
+  for (const cz of [-0.09, 0.09]) {
+    nvl.add(box(0.035, 0.03, 0.1, orangeM, 0.305, 0.015, cz));
+    nvl.add(box(0.02, 0.02, 0.075, mat(0x111111, 0.6, 0.4), 0.318, 0.016, cz));
   }
+  // gold power fingers between them
+  nvl.add(box(0.025, 0.012, 0.05, M.gold(), 0.315, 0.006, 0));
   mark(nvl, 'boardNvlink');
   root.add(nvl);
 
-  /* ----- misc small components (part of PCB) ----- */
+  /* ----- front-edge I/O: flat connector row + small power headers ----- */
+  const io = new THREE.Group();
+  for (let i = 0; i < 4; i++) {
+    io.add(box(0.058, 0.008, 0.018, mat(0x1b1d20, 0.5, 0.5), -0.285 + i * 0.075, 0.006, -0.155));
+    io.add(box(0.05, 0.004, 0.006, M.gold(), -0.285 + i * 0.075, 0.009, -0.148));
+  }
+  for (let i = 0; i < 3; i++) {
+    io.add(box(0.018, 0.012, 0.014, mat(0x0d0e10, 0.6, 0.3), -0.315, 0.008, 0.06 + i * 0.032));
+  }
+  mark(io, 'boardPcb');
+  root.add(io);
+
+  /* ----- misc small components (kept clear of the packages) ----- */
   const misc = new THREE.Group();
-  let s = 3;
-  const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
   const tiny = mat(0x2c2f33, 0.55, 0.45);
-  for (let i = 0; i < 70; i++) {
-    const x = (rand() - 0.5) * 0.6, z = (rand() - 0.5) * 0.3;
-    // keep clear of the packages
-    if (Math.abs(x) < 0.26 && z < 0.02 && z > -0.13) continue;
-    if (Math.abs(x) < 0.12 && z > 0.02) continue;
+  for (let i = 0; i < 60; i++) {
+    const x = -0.32 + rand() * 0.28, z = (rand() - 0.5) * 0.28;
+    if (x > -0.13 && Math.abs(z) < 0.11) continue;      // Grace + LPDDR zone
+    if (Math.abs(z) > 0.14 && x > -0.2) continue;       // edge banks
     misc.add(box(0.005 + rand() * 0.008, 0.003, 0.004 + rand() * 0.006, tiny, x, 0.004, z));
   }
   mark(misc, 'boardPcb');

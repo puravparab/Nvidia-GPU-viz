@@ -2,9 +2,12 @@ import * as THREE from 'three';
 import { mat, box, cyl, slab, led, tube, mark, dieTexture, M, GREEN } from '../common.js';
 
 /**
- * NVLink switch tray, lid removed. Two NVLink 5 switch ASICs inline on the centerline;
- * one under its cold plate, one exposed to show the silicon. In the NVL72
- * all 144 ports blind-mate at the rear — no front cables. Front of tray = +Z.
+ * NVLink switch tray, lid removed — matched to NVIDIA's GTC display unit:
+ * the two NVLink 5 switch ASICs sit SIDE-BY-SIDE in the rear half, each
+ * fanning four teal NVLink cable bundles back to the blind-mate connectors.
+ * Red/black 48 V feeds run down the centerline from the busbar clamp.
+ * One ASIC keeps its cold plate, one is exposed to show the silicon.
+ * Front of tray = +Z.
  */
 export function buildSwitchTray() {
   const root = new THREE.Group();
@@ -34,9 +37,9 @@ export function buildSwitchTray() {
     emissive: 0x2a3550, emissiveIntensity: 0.22, emissiveMap: dieTex,
   });
 
-  /* ----- ASIC 1 (rear): under its cold plate ----- */
+  /* ----- ASIC 1 (left): under its cold plate ----- */
   const covered = new THREE.Group();
-  covered.position.set(0, 0.008, -0.20);
+  covered.position.set(-0.115, 0.008, -0.16);
   covered.add(slab(0.13, 0.005, 0.13, 0.005, M.substrate(), 0, 0, 0));
   const plate1 = new THREE.Group();
   plate1.add(slab(0.12, 0.022, 0.12, 0.008, M.nickel(), 0, 0.005, 0));
@@ -48,9 +51,9 @@ export function buildSwitchTray() {
   mark(covered, 'nvswitchPackage');
   root.add(covered);
 
-  /* ----- ASIC 2 (front): exposed silicon ----- */
+  /* ----- ASIC 2 (right): exposed silicon ----- */
   const exposed = new THREE.Group();
-  exposed.position.set(0, 0.008, 0.02);
+  exposed.position.set(0.115, 0.008, -0.16);
   exposed.add(slab(0.13, 0.005, 0.13, 0.005, M.substrate(), 0, 0, 0));
   exposed.add(box(0.085, 0.004, 0.075, dieMat, 0, 0.007, 0));
   // port PHY strips along two die edges
@@ -65,14 +68,53 @@ export function buildSwitchTray() {
   mark(exposed, 'nvswitchPackage');
   root.add(exposed);
 
-  /* ----- coolant loop ----- */
+  /* ----- teal NVLink cable bundles: 4 per ASIC, fanning to the rear ----- */
+  const bundles = new THREE.Group();
+  const tealM = mat(0x2fb8ac, 0.55, 0.15);
+  for (const ax of [-0.115, 0.115]) {
+    for (let i = 0; i < 4; i++) {
+      const spread = (i - 1.5) * 0.052;
+      bundles.add(tube([
+        [ax + spread * 0.35, 0.026, -0.225],
+        [ax + spread * 0.8, 0.05, -0.32],
+        [ax + spread, 0.028, -0.415],
+      ], 0.009, tealM, 24));
+      // cable-header block on top of the package edge
+      bundles.add(box(0.022, 0.012, 0.02, mat(0x22262b, 0.45, 0.6), ax + spread * 0.35, 0.026, -0.215));
+    }
+  }
+  mark(bundles, 'spine');
+  root.add(bundles);
+
+  /* ----- 48 V feeds: red + black cables down the centerline ----- */
+  const power = new THREE.Group();
+  power.add(tube([[0.012, 0.03, -0.43], [0.014, 0.055, -0.2], [0.01, 0.03, 0.09]], 0.0085, mat(0xa32222, 0.5, 0.2), 24));
+  power.add(tube([[-0.012, 0.03, -0.43], [-0.014, 0.05, -0.19], [-0.01, 0.03, 0.1]], 0.0085, M.rubber(), 24));
+  // heatsinked power modules where the feeds land
+  power.add(box(0.05, 0.022, 0.06, mat(0x1a1c1f, 0.45, 0.7), 0.035, 0.017, 0.13));
+  power.add(box(0.05, 0.022, 0.06, mat(0x1a1c1f, 0.45, 0.7), -0.035, 0.017, 0.13));
+  mark(power, 'busbar');
+  root.add(power);
+
+  /* ----- mid-tray module row (per the photo: blocks across the width) ----- */
+  const mods = new THREE.Group();
+  const modM = mat(0x33373c, 0.5, 0.65);
+  const modM2 = mat(0x212429, 0.55, 0.5);
+  for (let i = 0; i < 5; i++) {
+    if (i === 2) continue; // centre kept clear for the power feeds
+    const x = -0.19 + i * 0.095;
+    mods.add(box(0.08, 0.03, 0.055, modM, x, 0.021, 0.03));
+    mods.add(box(0.07, 0.024, 0.006, modM2, x, 0.02, 0.062));
+  }
+  mark(mods, 'vrm');
+  root.add(mods);
+
+  /* ----- coolant loop: rear QDs feeding the ASIC plates ----- */
   const loop = new THREE.Group();
   const tubeM = M.rubber();
-  // series plumbing along the centerline: QDs → rear package → front package
-  loop.add(tube([[-0.045, 0.035, -0.42], [-0.03, 0.04, -0.34], [0, 0.035, -0.27]], 0.0075, tubeM));
-  loop.add(tube([[0.045, 0.035, -0.42], [0.03, 0.04, -0.34], [0, 0.035, -0.27]], 0.0075, tubeM));
-  loop.add(tube([[0, 0.035, -0.12], [0, 0.045, -0.09], [0, 0.035, -0.06]], 0.0075, tubeM));
-  for (const [qx, col] of [[-0.045, M.blueTube()], [0.045, M.redTube()]]) {
+  loop.add(tube([[-0.2, 0.035, -0.42], [-0.15, 0.04, -0.3], [-0.115, 0.032, -0.24]], 0.0075, tubeM));
+  loop.add(tube([[0.2, 0.035, -0.42], [0.16, 0.04, -0.3], [0.115, 0.032, -0.24]], 0.0075, tubeM));
+  for (const [qx, col] of [[-0.2, M.blueTube()], [0.2, M.redTube()]]) {
     const qd = cyl(0.011, 0.011, 0.045, col, qx, 0.035, -0.435, 12);
     qd.rotation.x = Math.PI / 2;
     loop.add(qd);
@@ -90,29 +132,17 @@ export function buildSwitchTray() {
   mark(back, 'swBackplane');
   root.add(back);
   // busbar power clamp
-  const pwr = box(0.05, 0.03, 0.02, M.copper(), 0.24, 0.025, -D / 2 + 0.015);
+  const pwr = box(0.05, 0.03, 0.02, M.copper(), 0, 0.025, -D / 2 + 0.015);
   mark(pwr, 'busbar');
   root.add(pwr);
 
-  /* ----- VRM banks ----- */
-  const vrm = new THREE.Group();
-  const indM = mat(0x3a3f45, 0.5, 0.6);
-  for (const vx of [-0.22, 0.22]) {
-    for (let i = 0; i < 6; i++) {
-      vrm.add(box(0.016, 0.01, 0.016, indM, vx, 0.011, -0.2 + i * 0.052));
-    }
-  }
-  for (let i = 0; i < 5; i++) {
-    vrm.add(box(0.016, 0.01, 0.016, indM, -0.16, 0.011, -0.22 + i * 0.05));
-  }
-  mark(vrm, 'vrm');
-  root.add(vrm);
-
-  /* ----- management module (front) ----- */
+  /* ----- management cluster (front, centre-left like the photo) ----- */
   const hmc = new THREE.Group();
-  hmc.add(box(0.06, 0.003, 0.1, M.pcbDark(), -0.2, 0.012, D / 2 - 0.1));
-  hmc.add(box(0.018, 0.005, 0.018, M.chipBlack(), -0.2, 0.016, D / 2 - 0.1));
-  hmc.add(led(0.0025, GREEN, -0.2, 0.018, D / 2 - 0.05));
+  hmc.add(box(0.09, 0.003, 0.09, M.pcbDark(), -0.12, 0.012, D / 2 - 0.08));
+  hmc.add(box(0.018, 0.005, 0.018, M.chipBlack(), -0.12, 0.016, D / 2 - 0.09));
+  hmc.add(box(0.014, 0.013, 0.016, M.steel(), -0.15, 0.012, D / 2 - 0.045));
+  hmc.add(box(0.014, 0.013, 0.016, M.steel(), -0.10, 0.012, D / 2 - 0.045));
+  hmc.add(led(0.0025, GREEN, -0.075, 0.018, D / 2 - 0.05));
   mark(hmc, 'hmc');
   root.add(hmc);
 

@@ -16,6 +16,12 @@ export function buildChip() {
   for (let i = 0; i < 24; i++) {
     sub.add(box(0.012, 0.008, 0.012, ballM, -0.55 + i * 0.048, -0.002, 0.455));
   }
+  // silver stiffener frame around the package rim (visible in the B200 photo)
+  const stiffM = mat(0xc8ccd2, 0.35, 0.9);
+  sub.add(box(1.16, 0.014, 0.09, stiffM, 0, 0.046, -0.425));
+  sub.add(box(1.16, 0.014, 0.09, stiffM, 0, 0.046, 0.425));
+  sub.add(box(0.09, 0.014, 0.76, stiffM, -0.535, 0.046, 0));
+  sub.add(box(0.09, 0.014, 0.76, stiffM, 0.535, 0.046, 0));
   mark(sub, 'substrate');
   root.add(sub);
 
@@ -70,11 +76,10 @@ export function buildChip() {
   const capM2 = mat(0x6f6961, 0.45, 0.5);
   let s = 17;
   const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
-  for (let i = 0; i < 120; i++) {
-    const edge = Math.floor(rand() * 4);
-    let x, z;
-    if (edge < 2) { x = (rand() - 0.5) * 1.04; z = (edge === 0 ? -1 : 1) * (0.37 + rand() * 0.06); }
-    else { x = (edge === 2 ? -1 : 1) * (0.545 + rand() * 0.025); z = (rand() - 0.5) * 0.6; }
+  for (let i = 0; i < 90; i++) {
+    // narrow bands between the interposer edge and the stiffener frame
+    const x = (rand() - 0.5) * 0.92;
+    const z = (rand() > 0.5 ? -1 : 1) * (0.345 + rand() * 0.028);
     caps.add(box(0.014, 0.007, 0.008, rand() > 0.5 ? capM : capM2, x, 0.049, z));
   }
   mark(caps, 'capacitors');
@@ -94,12 +99,13 @@ export function buildChip() {
   ctx.fillText('BLACKWELL · 208B XTORS · CoWoS-L', 20, 100);
   const labelTex = new THREE.CanvasTexture(cv);
   labelTex.colorSpace = THREE.SRGBColorSpace;
+  // etched onto the front stiffener rail
   const label = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.46, 0.115),
+    new THREE.PlaneGeometry(0.34, 0.075),
     new THREE.MeshBasicMaterial({ map: labelTex, transparent: true })
   );
   label.rotation.x = -Math.PI / 2;
-  label.position.set(-0.30, 0.0468, 0.41);
+  label.position.set(-0.35, 0.0537, 0.425);
   root.add(label);
 
   /* ----- shadow disc ----- */
