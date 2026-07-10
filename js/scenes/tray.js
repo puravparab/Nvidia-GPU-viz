@@ -14,14 +14,16 @@ export function buildTray() {
   const root = new THREE.Group();
   const W = 0.537, D = 0.9, WALL = 0.05;
 
-  const darkPlate = mat(0x1f2226, 0.42, 0.75);       // anodised cold plate
-  const plateRidge = mat(0x2a2e33, 0.4, 0.8);
+  // teal anodised GPU cold plates + grey Grace plate, per the GTC tray photo
+  const tealPlate = mat(0x1f6a70, 0.38, 0.7);
+  const tealRidge = mat(0x27787e, 0.35, 0.75);
+  const darkPlate = mat(0x3a3f45, 0.4, 0.8);
   const labelM = mat(0x9aa0a6, 0.35, 0.85);          // small spec label on each plate
   const pcbM = mat(0x101214, 0.55, 0.35);            // near-black board
 
-  /* ----- chassis ----- */
+  /* ----- chassis: bright aluminium interior like the production tray ----- */
   const chassis = new THREE.Group();
-  chassis.add(box(W, 0.006, D, mat(0x2a2d31, 0.45, 0.8), 0, -0.003, 0));
+  chassis.add(box(W, 0.006, D, mat(0x565c62, 0.4, 0.85), 0, -0.003, 0));
   chassis.add(box(0.006, WALL, D, M.panelMid(), -W / 2 + 0.003, WALL / 2, 0));
   chassis.add(box(0.006, WALL, D, M.panelMid(), W / 2 - 0.003, WALL / 2, 0));
   chassis.add(box(W, WALL, 0.008, M.panelMid(), 0, WALL / 2, -D / 2 + 0.004));
@@ -43,9 +45,9 @@ export function buildTray() {
     // --- two Blackwell GPUs under dark cold plates: rear row (4 across tray) ---
     for (const gx of [-0.06, 0.06]) {
       const plate = new THREE.Group();
-      plate.add(slab(0.105, 0.02, 0.115, 0.008, darkPlate, gx, 0.004, -0.19));
+      plate.add(slab(0.105, 0.02, 0.115, 0.008, tealPlate, gx, 0.004, -0.19));
       for (let i = 0; i < 3; i++) {
-        plate.add(box(0.085, 0.003, 0.016, plateRidge, gx, 0.025, -0.23 + i * 0.038));
+        plate.add(box(0.085, 0.003, 0.016, tealRidge, gx, 0.025, -0.23 + i * 0.038));
       }
       // pale spec label square (visible in the photo)
       plate.add(box(0.034, 0.002, 0.026, labelM, gx, 0.0255, -0.185));
@@ -91,9 +93,9 @@ export function buildTray() {
     mark(mezz, 'connectx');
     root.add(mezz);
 
-    /* --- coolant loop: braided steel hoses, rear quick-disconnects --- */
+    /* --- coolant loop: black corrugated hoses, rear quick-disconnects --- */
     const loop = new THREE.Group();
-    const tubeM = mat(0x6f757a, 0.45, 0.8);
+    const tubeM = mat(0x1a1c1e, 0.75, 0.25);
     loop.add(tube([
       [bx - 0.035, 0.035, -0.44], [bx - 0.06, 0.038, -0.36], [bx - 0.06, 0.032, -0.3],
     ], 0.008, tubeM));
@@ -128,8 +130,9 @@ export function buildTray() {
 
   /* ----- central fan wall directly behind the boards (per the diagram) ----- */
   const fans = new THREE.Group();
-  const fanFrameM = mat(0x090b0c, 0.8, 0.2);
-  const fanBladeM = mat(0x202428, 0.72, 0.25);
+  // silver fan cassettes with dark rotors, as in the GTC photo
+  const fanFrameM = mat(0x4c5257, 0.45, 0.8);
+  const fanBladeM = mat(0x17191c, 0.72, 0.25);
   for (let i = 0; i < 8; i++) {
     const x = -0.225 + i * 0.064;
     fans.add(box(0.055, 0.05, 0.026, fanFrameM, x, 0.03, 0.205));

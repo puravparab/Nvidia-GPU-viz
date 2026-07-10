@@ -11,14 +11,64 @@ import { mat, box, cyl, slab, mark, M, GREEN } from '../common.js';
  * cluster, the tan Grace-Grace C2C connector, BMC, CMOS battery and fan
  * headers.
  */
+/** Gold "exposed die" texture matching NVIDIA's Bianca render: two large
+ *  bronze compute dies centre, flanked by slimmer HBM columns. */
+function b200DieTexture() {
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 256;
+  const ctx = cv.getContext('2d');
+  ctx.fillStyle = '#4a3d1f';
+  ctx.fillRect(0, 0, 256, 256);
+  let s = 11;
+  const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  // HBM columns along left and right edges
+  for (const x0 of [6, 216]) {
+    for (let j = 0; j < 4; j++) {
+      ctx.fillStyle = j % 2 ? '#6b5a2c' : '#75622f';
+      ctx.fillRect(x0, 8 + j * 61, 34, 55);
+    }
+  }
+  // two compute dies side by side in the middle
+  for (const x0 of [48, 132]) {
+    ctx.fillStyle = '#8a7434';
+    ctx.fillRect(x0, 10, 76, 236);
+    for (let i = 0; i < 40; i++) {
+      const g = 120 + Math.floor(rand() * 50);
+      ctx.fillStyle = `rgb(${g},${g - 22},${40 + Math.floor(rand() * 18)})`;
+      ctx.fillRect(x0 + 4 + rand() * 62, 14 + rand() * 222, 4 + rand() * 12, 3 + rand() * 9);
+    }
+  }
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  return tex;
+}
+
+/** Small iridescent mosaic for the Grace die window in NVIDIA's render. */
+function graceWindowTexture() {
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 64;
+  const ctx = cv.getContext('2d');
+  let s = 5;
+  const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  const cols = ['#3f7a2e', '#63a02f', '#b07f2a', '#8f4f22', '#2e6f5f', '#c9a43a'];
+  for (let x = 0; x < 8; x++) {
+    for (let y = 0; y < 8; y++) {
+      ctx.fillStyle = cols[Math.floor(rand() * cols.length)];
+      ctx.fillRect(x * 8, y * 8, 8, 8);
+    }
+  }
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  return tex;
+}
+
 export function buildBoard() {
   const root = new THREE.Group();
   const W = 0.62, D = 0.44;
 
   const goldRim = mat(0x8a6d38, 0.3, 0.95);
-  const lidTop = mat(0x23262b, 0.3, 0.75);
   const pkgSubM = mat(0x14161a, 0.5, 0.4);
-  const tealRing = mat(0x1d4a45, 0.42, 0.35);
 
   /* ----- PCB ----- */
   const pcb = new THREE.Group();
@@ -29,26 +79,30 @@ export function buildBoard() {
   mark(pcb, 'boardPcb');
   root.add(pcb);
 
-  /* ----- two Blackwell B200 packages (rear): gold frame + teal underfill ----- */
+  /* ----- two Blackwell B200 packages (rear): exposed gold dies in a thin
+     gold stiffener frame on a black substrate, per NVIDIA's board render ----- */
+  const b200DieM = new THREE.MeshStandardMaterial({
+    map: b200DieTexture(), roughness: 0.28, metalness: 0.85,
+  });
   for (const gz of [-0.105, 0.105]) {
     const pkg = new THREE.Group();
     pkg.position.set(0.155, 0, gz);
     pkg.add(slab(0.15, 0.006, 0.15, 0.005, pkgSubM, 0, 0, 0));
-    pkg.add(slab(0.14, 0.003, 0.14, 0.004, tealRing, 0, 0.006, 0));
-    pkg.add(slab(0.132, 0.006, 0.132, 0.004, goldRim, 0, 0.009, 0));
-    pkg.add(box(0.108, 0.004, 0.108, lidTop, 0, 0.015, 0));
+    pkg.add(slab(0.138, 0.004, 0.138, 0.004, goldRim, 0, 0.006, 0));
+    pkg.add(box(0.126, 0.006, 0.126, b200DieM, 0, 0.009, 0));
     mark(pkg, 'b200Package');
     root.add(pkg);
   }
 
-  /* ----- Grace CPU package: centreline behind the GPUs ----- */
+  /* ----- Grace CPU package: dark lid with a small iridescent die window ----- */
   const grace = new THREE.Group();
   grace.position.set(-0.09, 0, 0);
   grace.add(slab(0.14, 0.005, 0.14, 0.005, pkgSubM, 0, 0, 0));
-  grace.add(slab(0.13, 0.003, 0.13, 0.004, tealRing, 0, 0.005, 0));
-  grace.add(slab(0.122, 0.005, 0.122, 0.004, mat(0x9ba1a8, 0.4, 0.85), 0, 0.008, 0));
-  // exposed die window (multicoloured in NVIDIA's render)
-  grace.add(box(0.052, 0.004, 0.052, mat(0x1a2f3a, 0.25, 0.85, { emissive: 0x0e3a4a, emissiveIntensity: 0.5 }), 0, 0.013, 0));
+  grace.add(slab(0.126, 0.007, 0.126, 0.004, mat(0x1e2126, 0.32, 0.8), 0, 0.005, 0));
+  grace.add(box(0.052, 0.004, 0.052, new THREE.MeshStandardMaterial({
+    map: graceWindowTexture(), roughness: 0.25, metalness: 0.6,
+    emissive: 0xffffff, emissiveMap: graceWindowTexture(), emissiveIntensity: 0.22,
+  }), 0, 0.013, 0));
   mark(grace, 'graceCpu');
   root.add(grace);
 
@@ -112,7 +166,7 @@ export function buildBoard() {
   root.add(nvl);
   // 12V + GND RapidLock power connectors near the VRMs (yellow in the diagram)
   const rapid = new THREE.Group();
-  const yellowM = mat(0x8f7226, 0.42, 0.75);
+  const yellowM = mat(0x77601f, 0.42, 0.75);
   for (const [rx, rz] of [[0.29, -0.185], [0.29, 0.185], [-0.02, -0.19], [-0.02, 0.19], [-0.24, -0.115], [-0.24, 0.115], [0.02, -0.15], [0.02, 0.15]]) {
     rapid.add(box(0.024, 0.012, 0.014, yellowM, rx, 0.007, rz));
   }
@@ -121,7 +175,7 @@ export function buildBoard() {
 
   /* ----- two Mirror-Mezz connectors ahead of Grace (ConnectX mezzanine site) ----- */
   const mezzConn = new THREE.Group();
-  const mezzM = mat(0x22382a, 0.5, 0.45);
+  const mezzM = mat(0x1a2a20, 0.5, 0.45);
   mezzConn.add(box(0.075, 0.008, 0.05, mezzM, -0.21, 0.005, -0.02));
   mezzConn.add(box(0.075, 0.008, 0.05, mezzM, -0.21, 0.005, 0.045));
   mark(mezzConn, 'connectx');
@@ -131,26 +185,26 @@ export function buildBoard() {
   const io = new THREE.Group();
   // MCIO x16 (blue), SimSAS PCIe x8 ×2 (violet), 8x connector (purple), 225W (red)
   // — real connectors are dark plastic with only a tinted key, not saturated blocks
-  io.add(box(0.02, 0.012, 0.05, mat(0x1d3a55, 0.5, 0.35), -0.295, 0.007, -0.06));
-  io.add(box(0.016, 0.01, 0.036, mat(0x2c2a48, 0.5, 0.35), -0.295, 0.006, 0.0));
-  io.add(box(0.016, 0.01, 0.036, mat(0x2c2a48, 0.5, 0.35), -0.295, 0.006, 0.05));
-  io.add(box(0.012, 0.01, 0.022, mat(0x322646, 0.5, 0.35), -0.295, 0.006, 0.095));
-  io.add(box(0.014, 0.012, 0.02, mat(0x581f1f, 0.5, 0.35), -0.295, 0.007, -0.11));
+  io.add(box(0.02, 0.012, 0.05, mat(0x152836, 0.5, 0.35), -0.295, 0.007, -0.06));
+  io.add(box(0.016, 0.01, 0.036, mat(0x1e1d30, 0.5, 0.35), -0.295, 0.006, 0.0));
+  io.add(box(0.016, 0.01, 0.036, mat(0x1e1d30, 0.5, 0.35), -0.295, 0.006, 0.05));
+  io.add(box(0.012, 0.01, 0.022, mat(0x221a30, 0.5, 0.35), -0.295, 0.006, 0.095));
+  io.add(box(0.014, 0.012, 0.02, mat(0x3a1616, 0.5, 0.35), -0.295, 0.007, -0.11));
   mark(io, 'boardPcb');
   root.add(io);
   // tan Grace-Grace C2C connector: the 600 GB/s link to the sibling board
-  const gg = box(0.024, 0.014, 0.085, mat(0x51422f, 0.5, 0.35), -0.255, 0.008, -0.165);
+  const gg = box(0.024, 0.014, 0.085, mat(0x3a3024, 0.5, 0.35), -0.255, 0.008, -0.165);
   mark(gg, 'graceGraceLink');
   root.add(gg);
   // BMC connector (green, left edge) + CMOS battery
   const bmcM = new THREE.Group();
-  bmcM.add(box(0.016, 0.012, 0.09, mat(0x24402c, 0.5, 0.4), -0.3, 0.007, 0.15));
+  bmcM.add(box(0.016, 0.012, 0.09, mat(0x1a2c20, 0.5, 0.4), -0.3, 0.007, 0.15));
   bmcM.add(cyl(0.012, 0.012, 0.005, M.steel(), -0.245, 0.005, 0.185, 14));
   mark(bmcM, 'hmc');
   root.add(bmcM);
   // 8-pin fan connectors along the front edge (red in the diagram)
   const fanConn = new THREE.Group();
-  const redM = mat(0x5c2424, 0.5, 0.35);
+  const redM = mat(0x3d1a1a, 0.5, 0.35);
   for (const fx of [-0.16, -0.12, -0.08, 0.08, 0.12, 0.16]) {
     fanConn.add(box(0.024, 0.008, 0.012, redM, fx, 0.005, -0.207));
   }

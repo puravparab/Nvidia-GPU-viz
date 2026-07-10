@@ -134,8 +134,10 @@ export function buildRack() {
   for (const [kind, count] of plan) {
     for (let i = 0; i < count; i++) {
       y -= U;
-      // Subtle rack-unit separator; the champagne bezel frames whole bays.
-      root.add(box(IW, 0.0015, 0.012, mat(0x27292b, 0.55, 0.6), 0, y + 0.001, FRONT + 0.003));
+      // Champagne hairline between rack units — in the GTC photos every tray
+      // front is framed by a thin gold trim line.
+      const sepM = kind === 'blank' ? mat(0x27292b, 0.55, 0.6) : mat(0x866b3c, 0.35, 0.9);
+      root.add(box(IW, kind === 'blank' ? 0.0015 : 0.004, 0.012, sepM, 0, y + 0.001, FRONT + 0.003));
       if (kind === 'blank') {
         const b = box(IW, U * 0.9, 0.008, mat(0x0b0c0d, 0.6, 0.5), 0, y + U / 2, FRONT);
         mark(b, 'rackFrame');
@@ -213,8 +215,9 @@ export function buildRack() {
   spine.add(box(0.006, spineH, 0.006, mat(0x08090a, 0.6, 0.4), 0, spineY, -TD / 2 - 0.104));
   spine.add(box(0.012, spineH + 0.02, 0.02, goldM, -0.158, spineY, -TD / 2 - 0.095));
   spine.add(box(0.012, spineH + 0.02, 0.02, goldM, 0.158, spineY, -TD / 2 - 0.095));
-  // dark cable mass just visible behind the mesh
-  const cableM = mat(0x1c1e22, 0.8, 0.25);
+  // silver braided NVLink bundles just visible behind the mesh — in the rear
+  // photos the copper backplane reads as bright silver cable looms
+  const cableM = mat(0x9ea4aa, 0.55, 0.6);
   for (let i = 0; i < 8; i++) {
     spine.add(cyl(0.014, 0.014, spineH * 0.96, cableM, -0.125 + i * 0.036, spineY, -TD / 2 - 0.112, 8));
   }

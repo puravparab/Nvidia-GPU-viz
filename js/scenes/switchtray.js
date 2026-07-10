@@ -15,7 +15,7 @@ export function buildSwitchTray() {
 
   /* ----- chassis ----- */
   const chassis = new THREE.Group();
-  chassis.add(box(W, 0.006, D, mat(0x2a2d31, 0.45, 0.8), 0, -0.003, 0));
+  chassis.add(box(W, 0.006, D, mat(0x565c62, 0.4, 0.85), 0, -0.003, 0));
   chassis.add(box(0.006, WALL, D, M.panelMid(), -W / 2 + 0.003, WALL / 2, 0));
   chassis.add(box(0.006, WALL, D, M.panelMid(), W / 2 - 0.003, WALL / 2, 0));
   chassis.add(box(W, WALL, 0.008, M.panelMid(), 0, WALL / 2, -D / 2 + 0.004));
