@@ -103,7 +103,7 @@ export const INFO = {
       ['NVFP4 sparse | dense', '80 | 40 PFLOPS per tray'],
       ['HBM3e', '744 GB usable per tray'],
       ['LPDDR5X', '960 GB per tray'],
-      ['Power', '~5.4 kW per tray'],
+      ['Power', 'Up to ~6.3 kW (max TDP)'],
       ['Cooling', 'Direct-to-chip liquid cold plates'],
     ],
     sources: [['NVIDIA DGX GB hardware guide', 'https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html']],
@@ -270,15 +270,19 @@ export const INFO = {
   },
   connectx: {
     tag: 'Networking', name: 'ConnectX-7 NIC (400G)',
-    blurb: 'Four single-port ConnectX-7 adapters per tray provide the east-west scale-out fabric: one 400 Gb/s InfiniBand or Ethernet endpoint per GPU. The NIC silicon is liquid-cooled while its OSFP cages remain accessible from the cold-aisle front panel.',
+    blurb: 'Four single-port ConnectX-7 adapters per tray provide the east-west scale-out fabric: one 400 Gb/s InfiniBand or Ethernet endpoint per GPU. The liquid-cooled NIC modules sit directly on the boards mid-tray — braided DensiLink runs carry their lanes forward to the OSFP cages on the cold-aisle front panel.',
     specs: [
       ['Per tray', '4× ConnectX-7'],
       ['Speed', '400 Gb/s each'],
       ['Fabric', 'InfiniBand NDR / Ethernet'],
       ['Role', 'Scale-out (rack-to-rack)'],
       ['Cooling', 'NIC silicon liquid-cooled'],
+      ['Front-panel link', 'DensiLink cable runs'],
     ],
-    sources: [['NVIDIA DGX GB hardware guide', 'https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html']],
+    sources: [
+      ['NVIDIA DGX GB hardware guide', 'https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html'],
+      ['SemiAnalysis GB200 hardware architecture', 'https://newsletter.semianalysis.com/p/gb200-hardware-architecture-and-component'],
+    ],
   },
   bluefield: {
     tag: 'Networking', name: 'BlueField-3 DPU',
@@ -293,15 +297,18 @@ export const INFO = {
   },
   nvme: {
     tag: 'Storage', name: 'E1.S NVMe Storage',
-    blurb: 'Four E1.S NVMe drives on the front panel give each tray fast local scratch storage for checkpoints and data staging. The E1.S ruler form factor is hot-swappable from the cold aisle.',
+    blurb: 'E1.S ruler drives in the front bay give each tray fast local scratch storage for checkpoints and data staging, hot-swappable from the cold aisle. The DGX configuration ships four 3.84 TB drives as a RAID-0 cache plus an M.2 boot device; the chassis supports up to eight bays.',
     specs: [
-      ['Per tray', '4× E1.S NVMe'],
+      ['Per tray', '4× E1.S NVMe (up to 8 bays)'],
       ['Capacity', '4× 3.84 TB cache'],
       ['Boot', '1× 1.92 TB M.2 NVMe'],
       ['Layout', 'Software RAID 0 cache'],
       ['Serviceability', 'Front hot-swap'],
     ],
-    sources: [['NVIDIA DGX GB hardware guide', 'https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html']],
+    sources: [
+      ['NVIDIA DGX GB hardware guide', 'https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html'],
+      ['SemiAnalysis GB200 hardware architecture', 'https://newsletter.semianalysis.com/p/gb200-hardware-architecture-and-component'],
+    ],
   },
   nvlinkConnector: {
     tag: 'Interconnect', name: 'NVLink Backplane Connectors',
@@ -386,11 +393,11 @@ export const INFO = {
   },
   boardPcb: {
     tag: 'Structure', name: 'Superchip PCB',
-    blurb: 'A high-layer-count board roughly 600 mm long carrying the superchip. Dozens of copper layers route power planes and the ultra-dense NVLink and C2C signal pairs with tight impedance control.',
+    blurb: 'A 22-layer HDI board carrying the superchip. Its copper layers route power planes and the ultra-dense NVLink and C2C signal pairs with tight impedance control; the module blind-mates to the tray through high-density connectors.',
     specs: [
-      ['Length', '~600 mm'],
-      ['Layers', 'High-layer-count HDI'],
+      ['Layers', '22-layer HDI'],
       ['Signals', 'NVLink 5, C2C, PCIe Gen5'],
+      ['Mounting', 'High-density mezzanine connectors'],
     ],
   },
   boardNvlink: {

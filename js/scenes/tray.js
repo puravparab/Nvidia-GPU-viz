@@ -1,94 +1,97 @@
 import * as THREE from 'three';
-import { mat, glowMat, box, cyl, slab, led, tube, mark, ventTexture, M, GREEN } from '../common.js';
+import { mat, box, cyl, slab, led, tube, mark, M, GREEN } from '../common.js';
 
 /**
- * 1U compute tray, lid removed. Front of tray = +Z.
- * Two GB200 "Bianca" boards side by side; GPUs (under black cold-plate
- * assemblies) sit at the NVLink rear edge, Grace is ahead of them, and the
- * fan wall separates the liquid-cooled compute from the air-cooled front I/O.
+ * 1U compute tray, lid removed — matched to the GTC display photos and the
+ * DGX GB200 hardware guide. Front of tray = +Z. Two Bianca boards sit side
+ * by side: four dark anodised GPU cold plates in a row at the NVLink rear
+ * edge, one Grace plate per board ahead of them. A power-distribution board
+ * feeds from the busbar clip; liquid-cooled ConnectX-7 cards and braided
+ * DensiLink runs sit ahead of the boards; a central fan wall air-cools the
+ * storage/management zone behind the front I/O.
  */
 export function buildTray() {
   const root = new THREE.Group();
-  const W = 0.537, D = 0.9, WALL = 0.05; // 1U interior ≈ 44mm; slightly exaggerated for readability
+  const W = 0.537, D = 0.9, WALL = 0.05;
+
+  const darkPlate = mat(0x1f2226, 0.42, 0.75);       // anodised cold plate
+  const plateRidge = mat(0x2a2e33, 0.4, 0.8);
+  const labelM = mat(0x9aa0a6, 0.35, 0.85);          // small spec label on each plate
+  const pcbM = mat(0x101214, 0.55, 0.35);            // near-black board
 
   /* ----- chassis ----- */
   const chassis = new THREE.Group();
-  chassis.add(box(W, 0.006, D, mat(0x2a2d31, 0.45, 0.8), 0, -0.003, 0));                 // floor
-  chassis.add(box(0.006, WALL, D, M.panelMid(), -W / 2 + 0.003, WALL / 2, 0));           // left wall
-  chassis.add(box(0.006, WALL, D, M.panelMid(), W / 2 - 0.003, WALL / 2, 0));            // right wall
-  chassis.add(box(W, WALL, 0.008, M.panelMid(), 0, WALL / 2, -D / 2 + 0.004));           // rear wall
-  // front faceplate with cutouts implied
+  chassis.add(box(W, 0.006, D, mat(0x2a2d31, 0.45, 0.8), 0, -0.003, 0));
+  chassis.add(box(0.006, WALL, D, M.panelMid(), -W / 2 + 0.003, WALL / 2, 0));
+  chassis.add(box(0.006, WALL, D, M.panelMid(), W / 2 - 0.003, WALL / 2, 0));
+  chassis.add(box(W, WALL, 0.008, M.panelMid(), 0, WALL / 2, -D / 2 + 0.004));
   chassis.add(box(W, WALL, 0.01, mat(0x1d2023, 0.45, 0.7), 0, WALL / 2, D / 2 - 0.005));
-  // rack ears
   chassis.add(box(0.02, WALL, 0.012, M.steel(), -W / 2 - 0.01, WALL / 2, D / 2 - 0.006));
   chassis.add(box(0.02, WALL, 0.012, M.steel(), W / 2 + 0.01, WALL / 2, D / 2 - 0.006));
   mark(chassis, 'trayChassis');
   root.add(chassis);
 
-  /* ----- two Bianca boards ----- */
-  const boardW = 0.235, boardL = 0.56;
+  /* ----- two Bianca boards side by side ----- */
+  const boardW = 0.245, boardL = 0.58;
   for (const bx of [-0.128, 0.128]) {
     const b = new THREE.Group();
-    b.position.set(bx, 0.008, -0.06);
+    b.position.set(bx, 0.008, -0.1);
 
-    // PCB
-    b.add(box(boardW, 0.004, boardL, M.pcb(), 0, 0, 0));
+    // near-black PCB
+    b.add(box(boardW, 0.004, boardL, pcbM, 0, 0, 0));
 
-    // --- Grace CPU zone (front third) with its production black cold plate ---
+    // --- two Blackwell GPUs under dark cold plates: rear row (4 across tray) ---
+    for (const gx of [-0.06, 0.06]) {
+      const plate = new THREE.Group();
+      plate.add(slab(0.105, 0.02, 0.115, 0.008, darkPlate, gx, 0.004, -0.19));
+      for (let i = 0; i < 3; i++) {
+        plate.add(box(0.085, 0.003, 0.016, plateRidge, gx, 0.025, -0.23 + i * 0.038));
+      }
+      // pale spec label square (visible in the photo)
+      plate.add(box(0.034, 0.002, 0.026, labelM, gx, 0.0255, -0.185));
+      mark(plate, 'gpuColdplate');
+      b.add(plate);
+    }
+
+    // --- Grace CPU under its own dark plate, centre of the board, mid-depth ---
     const cpuPlate = new THREE.Group();
-    cpuPlate.add(slab(0.09, 0.017, 0.09, 0.008, mat(0x07090a, 0.78, 0.22), 0, 0.004, 0.15));
-    cpuPlate.add(box(0.062, 0.005, 0.062, mat(0x171a1c, 0.72, 0.3), 0, 0.022, 0.15));
+    cpuPlate.add(slab(0.095, 0.016, 0.095, 0.008, darkPlate, 0, 0.004, -0.02));
+    cpuPlate.add(box(0.03, 0.002, 0.022, labelM, 0, 0.021, -0.02));
     mark(cpuPlate, 'cpuColdplate');
     b.add(cpuPlate);
-    // LPDDR5X flanking the CPU plate
-    for (const sx of [-0.075, 0.075]) {
+
+    // LPDDR5X banks flanking the Grace plate across the board's width
+    for (const sx of [-0.085, 0.085]) {
       for (let i = 0; i < 4; i++) {
-        const chip = box(0.024, 0.004, 0.017, M.chipBlack(), sx, 0.006, 0.115 + i * 0.036);
+        const chip = box(0.022, 0.004, 0.03, M.chipBlack(), sx, 0.006, -0.075 + i * 0.038);
         mark(chip, 'lpddr');
         b.add(chip);
       }
     }
 
-    // --- two Blackwell GPUs (rear) under larger black cold plates ---
-    for (const gx of [-0.058, 0.058]) {
-      const plate = new THREE.Group();
-      plate.add(slab(0.102, 0.021, 0.118, 0.008, mat(0x07090a, 0.78, 0.22), gx, 0.004, -0.17));
-      // machined ridge detail
-      for (let i = 0; i < 4; i++) {
-        plate.add(box(0.08, 0.004, 0.012, mat(0x171a1c, 0.72, 0.3), gx, 0.026, -0.215 + i * 0.03));
-      }
-      mark(plate, 'gpuColdplate');
-      b.add(plate);
+    // VRM tiles between CPU and GPU zones
+    for (let i = 0; i < 6; i++) {
+      const v = box(0.014, 0.008, 0.014, mat(0x6d737a, 0.45, 0.7), -0.075 + i * 0.03, 0.006, -0.115);
+      mark(v, 'vrm');
+      b.add(v);
     }
 
-    // --- VRM banks along outer edges ---
-    for (const vx of [-boardW / 2 + 0.018, boardW / 2 - 0.018]) {
-      for (let i = 0; i < 7; i++) {
-        const v = box(0.014, 0.009, 0.014, mat(0x3a3f45, 0.5, 0.6), vx, 0.0065, -0.24 + i * 0.055);
-        mark(v, 'vrm');
-        b.add(v);
-      }
-    }
-
-    // board itself is clickable → drill to superchip
     mark(b, 'biancaBoard');
     root.add(b);
 
-    /* --- coolant loop for this board --- */
+    /* --- coolant loop: braided steel hoses, rear quick-disconnects --- */
     const loop = new THREE.Group();
     const tubeM = mat(0x9da4a9, 0.5, 0.75);
-    // serpentine: rear QDs -> GPU plates -> CPU plate
     loop.add(tube([
-      [bx - 0.03, 0.035, -0.44], [bx - 0.058, 0.035, -0.31], [bx - 0.058, 0.032, -0.23],
-    ], 0.0075, tubeM));
+      [bx - 0.035, 0.035, -0.44], [bx - 0.06, 0.038, -0.36], [bx - 0.06, 0.032, -0.3],
+    ], 0.008, tubeM));
     loop.add(tube([
-      [bx + 0.03, 0.035, -0.44], [bx + 0.058, 0.035, -0.31], [bx + 0.058, 0.032, -0.23],
-    ], 0.0075, tubeM));
+      [bx + 0.035, 0.035, -0.44], [bx + 0.06, 0.038, -0.36], [bx + 0.06, 0.032, -0.3],
+    ], 0.008, tubeM));
     loop.add(tube([
-      [bx - 0.058, 0.032, -0.11], [bx - 0.02, 0.034, 0.00], [bx, 0.032, 0.09],
-    ], 0.0075, tubeM));
-    // quick disconnects at the rear wall
-    for (const [qx, col] of [[bx - 0.03, M.blueTube()], [bx + 0.03, M.redTube()]]) {
+      [bx - 0.06, 0.032, -0.24], [bx - 0.02, 0.036, -0.16], [bx, 0.032, -0.12],
+    ], 0.008, tubeM));
+    for (const [qx, col] of [[bx - 0.035, M.blueTube()], [bx + 0.035, M.redTube()]]) {
       const qd = cyl(0.011, 0.011, 0.045, col, qx, 0.035, -0.435, 12);
       qd.rotation.x = Math.PI / 2;
       loop.add(qd);
@@ -107,7 +110,6 @@ export function buildTray() {
   }
   mark(nvl, 'nvlinkConnector');
   root.add(nvl);
-  // busbar power clamp (centre rear, copper)
   const pwr = box(0.05, 0.03, 0.02, M.copper(), 0.24, 0.025, -D / 2 + 0.015);
   mark(pwr, 'busbar');
   root.add(pwr);
@@ -131,6 +133,19 @@ export function buildTray() {
   }
   mark(cxCards, 'connectx');
   root.add(cxCards);
+
+  /* ----- braided DensiLink runs: boards → NIC cards (the photo's cable mass) ----- */
+  const cables = new THREE.Group();
+  const braidM = mat(0x191b1e, 0.85, 0.15);
+  const runs = [
+    [[-0.15, 0.02, 0.02], [-0.21, 0.06, 0.1], [-0.19, 0.028, 0.165]],
+    [[-0.09, 0.02, 0.0], [-0.06, 0.06, 0.09], [-0.095, 0.028, 0.165]],
+    [[0.09, 0.02, 0.01], [0.06, 0.06, 0.1], [0.095, 0.028, 0.165]],
+    [[0.15, 0.02, 0.02], [0.21, 0.06, 0.11], [0.19, 0.028, 0.165]],
+  ];
+  for (const pts of runs) cables.add(tube(pts, 0.011, braidM, 20));
+  mark(cables, 'connectx');
+  root.add(cables);
 
   /* ----- central fan wall for the air-cooled storage and management zone ----- */
   const fans = new THREE.Group();

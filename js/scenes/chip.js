@@ -29,47 +29,46 @@ export function buildChip() {
   mark(sub, 'substrate');
   root.add(sub);
 
-  /* ----- CoWoS advanced-package routing layer ----- */
-  const inter = box(1.04, 0.02, 0.68, mat(0x565c66, 0.32, 0.9), 0, 0.055, 0);
-  mark(inter, 'interposer');
-  root.add(inter);
+  /* ----- CoWoS-L molded body: dies + HBM sit nearly FLUSH (per the photo) ----- */
+  const mold = new THREE.Group();
+  mold.add(box(0.98, 0.03, 0.66, mat(0x15181d, 0.22, 0.85), 0, 0.06, 0));
+  // teal underfill/epoxy ring around the silicon (the photo's blue-green border)
+  const tealM = mat(0x2e7f78, 0.4, 0.35);
+  mold.add(box(1.0, 0.012, 0.012, tealM, 0, 0.051, -0.336));
+  mold.add(box(1.0, 0.012, 0.012, tealM, 0, 0.051, 0.336));
+  mold.add(box(0.012, 0.012, 0.684, tealM, -0.496, 0.051, 0));
+  mold.add(box(0.012, 0.012, 0.684, tealM, 0.496, 0.051, 0));
+  mark(mold, 'interposer');
+  root.add(mold);
 
-  /* ----- two compute dies ----- */
+  /* ----- two compute dies: barely proud of the molding, glossy ----- */
   const t1 = dieTexture(512, 512, '#10141d', 5);
   const t2 = dieTexture(512, 512, '#10141d', 23);
   for (const [dx, tex] of [[-0.155, t1], [0.155, t2]]) {
     const dm = new THREE.MeshStandardMaterial({
-      map: tex, roughness: 0.28, metalness: 0.8,
-      emissive: 0x2a3550, emissiveIntensity: 0.3, emissiveMap: tex,
+      map: tex, roughness: 0.18, metalness: 0.85,
+      emissive: 0x2a3550, emissiveIntensity: 0.18, emissiveMap: tex,
     });
-    const die = box(0.29, 0.022, 0.5, dm, dx, 0.075, 0);
+    const die = box(0.29, 0.007, 0.5, dm, dx, 0.0785, 0);
     mark(die, 'gpuDie');
     root.add(die);
   }
 
-  /* ----- NV-HBI die-to-die bridge (the glowing seam) ----- */
-  const hbi = box(0.024, 0.023, 0.5, glowMat(GREEN, 1.5), 0, 0.075, 0);
+  /* ----- NV-HBI die-to-die bridge: a subtle glowing seam, near-flush ----- */
+  const hbi = box(0.016, 0.0075, 0.5, glowMat(GREEN, 0.55), 0, 0.0788, 0);
   mark(hbi, 'nvhbi');
   root.add(hbi);
 
-  /* ----- 8 HBM3e stacks (2×2 per side) ----- */
-  const layerM = mat(0x24272c, 0.4, 0.7);
-  const topM = mat(0x31353c, 0.3, 0.8);
+  /* ----- 8 HBM3e stacks: flat molded tiles, 2×2 per side ----- */
+  const hbmM = mat(0x24272c, 0.26, 0.75);
   for (const sx of [-1, 1]) {
     for (let col = 0; col < 2; col++) {
       for (let row = 0; row < 2; row++) {
-        const stack = new THREE.Group();
-        // both columns stay on the interposer (x ±0.52), clear of the dies (±0.30)
-        const x = sx * (0.358 + col * 0.106);
+        const x = sx * (0.348 + col * 0.094);
         const z = -0.155 + row * 0.31;
-        // 8-high stacked DRAM dies — visible layering
-        for (let l = 0; l < 8; l++) {
-          stack.add(box(0.10, 0.0052, 0.26, l === 7 ? topM : layerM, x, 0.068 + l * 0.0062, z));
-        }
-        // base logic die slightly wider
-        stack.add(box(0.106, 0.006, 0.266, mat(0x1c1f24, 0.45, 0.6), x, 0.062, z));
-        mark(stack, 'hbmStack');
-        root.add(stack);
+        const tile = box(0.085, 0.006, 0.26, hbmM, x, 0.078, z);
+        mark(tile, 'hbmStack');
+        root.add(tile);
       }
     }
   }

@@ -50,7 +50,7 @@ export const TOUR = [
   },
   {
     level: 'board', info: 'graceCpu',
-    pos: [-0.07, 0.33, 0.38], target: [-0.07, 0, 0],
+    pos: [-0.09, 0.33, 0.4], target: [-0.09, 0, 0],
     text: 'The bare GB200 superchip board. Under the silver lid on the centreline sits the Grace CPU: 72 Arm cores flanked by banks of LPDDR5X memory.',
   },
   {
