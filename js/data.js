@@ -260,17 +260,31 @@ export const INFO = {
   },
   trayPower: {
     tag: 'Power', name: 'Tray Power Distribution Board',
-    blurb: 'The rear busbar clip feeds a local power-distribution board through paired high-current conductors. That board fans the nominal 50 V rack supply out to the two Bianca boards, networking cards, storage, fans, and management electronics.',
+    blurb: 'The rear busbar clip feeds a central power-distribution board through paired high-current conductors. The PDB steps the rack busbar supply down to 12 V DC and fans it out to the Bianca boards through yellow RapidLock 12 V/GND connector pairs placed beside each package’s voltage regulators, plus feeds for networking, storage, fans and management.',
     specs: [
-      ['Input', 'Nominal 50–51 V DC'],
+      ['Input', 'Rack busbar (nominal 48–51 V DC)'],
+      ['Output', '12 V DC via RapidLock pairs'],
       ['Source', 'Rear blind-mate busbar clip'],
       ['Loads', 'Compute, networking, storage, fans'],
     ],
-    sources: [['NVIDIA DGX GB hardware guide', 'https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html']],
+    sources: [
+      ['NVIDIA DGX GB hardware guide', 'https://docs.nvidia.com/dgx/dgxgb200-user-guide/hardware.html'],
+      ['SemiAnalysis GB200 hardware architecture', 'https://newsletter.semianalysis.com/p/gb200-hardware-architecture-and-component'],
+    ],
+  },
+  graceGraceLink: {
+    tag: 'Interconnect', name: 'Grace–Grace Coherent Link',
+    blurb: 'The tan connector near the front edge carries a coherent NVLink connection to the sibling Bianca board in the same tray — up to 600 GB/s bidirectional. It lets the two Grace CPUs share memory, storage and NICs like a dual-socket server, which is why deployments can depopulate down to a single frontend NIC per tray.',
+    specs: [
+      ['Bandwidth', 'Up to 600 GB/s bidirectional'],
+      ['Coherency', 'Shared memory across boards'],
+      ['Enables', 'NIC/storage sharing per tray'],
+    ],
+    sources: [['SemiAnalysis GB200 hardware architecture', 'https://newsletter.semianalysis.com/p/gb200-hardware-architecture-and-component']],
   },
   connectx: {
     tag: 'Networking', name: 'ConnectX-7 NIC (400G)',
-    blurb: 'Four single-port ConnectX-7 adapters per tray provide the east-west scale-out fabric: one 400 Gb/s InfiniBand or Ethernet endpoint per GPU. The liquid-cooled NIC modules sit directly on the boards mid-tray — braided DensiLink runs carry their lanes forward to the OSFP cages on the cold-aisle front panel.',
+    blurb: 'Four single-port ConnectX-7 adapters per tray provide the east-west scale-out fabric: one 400 Gb/s InfiniBand or Ethernet endpoint per GPU. The NIC silicon rides a mezzanine that mates to Mirror-Mezz connectors directly atop each Bianca board — sharing the boards’ cold plate — and braided DensiLink runs carry the lanes forward to the OSFP cages on the front panel.',
     specs: [
       ['Per tray', '4× ConnectX-7'],
       ['Speed', '400 Gb/s each'],

@@ -79,6 +79,18 @@ export function buildTray() {
     mark(b, 'biancaBoard');
     root.add(b);
 
+    /* --- ConnectX-7 mezzanine on Mirror-Mezz connectors, ahead of Grace --- */
+    const mezz = new THREE.Group();
+    mezz.add(box(0.13, 0.004, 0.09, mat(0x131518, 0.55, 0.35), bx, 0.046, 0.06));
+    for (const mx of [-0.032, 0.032]) {
+      mezz.add(slab(0.042, 0.01, 0.042, 0.004, mat(0x22272b, 0.4, 0.82), bx + mx, 0.05, 0.06));
+    }
+    for (const [sx, sz] of [[-0.055, -0.035], [0.055, -0.035], [-0.055, 0.035], [0.055, 0.035]]) {
+      mezz.add(cyl(0.0035, 0.0035, 0.034, M.steel(), bx + sx, 0.029, 0.06 + sz, 8));
+    }
+    mark(mezz, 'connectx');
+    root.add(mezz);
+
     /* --- coolant loop: braided steel hoses, rear quick-disconnects --- */
     const loop = new THREE.Group();
     const tubeM = mat(0x6f757a, 0.45, 0.8);
@@ -110,64 +122,64 @@ export function buildTray() {
   }
   mark(nvl, 'nvlinkConnector');
   root.add(nvl);
-  const pwr = box(0.05, 0.03, 0.02, M.copper(), 0.24, 0.025, -D / 2 + 0.015);
+  const pwr = box(0.05, 0.03, 0.02, M.copper(), 0, 0.025, -D / 2 + 0.015);
   mark(pwr, 'busbar');
   root.add(pwr);
 
-  /* ----- tray power distribution: busbar feed, PDB and paired conductors ----- */
-  const trayPower = new THREE.Group();
-  const orangeM = mat(0xc35d24, 0.46, 0.55);
-  trayPower.add(tube([[0.205, 0.03, -0.42], [0.17, 0.04, -0.22], [0.12, 0.032, 0.15]], 0.009, orangeM, 28));
-  trayPower.add(tube([[0.23, 0.03, -0.42], [0.20, 0.042, -0.20], [0.15, 0.032, 0.15]], 0.009, M.rubber(), 28));
-  trayPower.add(box(0.09, 0.025, 0.1, mat(0x20252a, 0.46, 0.72), 0.135, 0.018, 0.18));
-  for (let i = 0; i < 4; i++) trayPower.add(box(0.013, 0.012, 0.013, M.copper(), 0.105 + i * 0.02, 0.034, 0.155));
-  mark(trayPower, 'trayPower');
-  root.add(trayPower);
-
-  /* ----- four liquid-cooled ConnectX-7 network cards ----- */
-  const cxCards = new THREE.Group();
-  for (const x of [-0.19, -0.095, 0.095, 0.19]) {
-    cxCards.add(box(0.067, 0.004, 0.09, M.pcbDark(), x, 0.011, 0.21));
-    cxCards.add(slab(0.052, 0.012, 0.052, 0.005, mat(0x22272b, 0.4, 0.82), x, 0.013, 0.21));
-    cxCards.add(tube([[x - 0.018, 0.032, 0.18], [x, 0.036, 0.21], [x + 0.018, 0.032, 0.24]], 0.0045, mat(0xa0a7ac, 0.45, 0.78), 12));
-  }
-  mark(cxCards, 'connectx');
-  root.add(cxCards);
-
-  /* ----- braided DensiLink runs: boards → NIC cards (the photo's cable mass) ----- */
-  const cables = new THREE.Group();
-  const braidM = mat(0x191b1e, 0.85, 0.15);
-  const runs = [
-    [[-0.15, 0.02, 0.02], [-0.21, 0.06, 0.1], [-0.19, 0.028, 0.165]],
-    [[-0.09, 0.02, 0.0], [-0.06, 0.06, 0.09], [-0.095, 0.028, 0.165]],
-    [[0.09, 0.02, 0.01], [0.06, 0.06, 0.1], [0.095, 0.028, 0.165]],
-    [[0.15, 0.02, 0.02], [0.21, 0.06, 0.11], [0.19, 0.028, 0.165]],
-  ];
-  for (const pts of runs) cables.add(tube(pts, 0.011, braidM, 20));
-  mark(cables, 'connectx');
-  root.add(cables);
-
-  /* ----- central fan wall for the air-cooled storage and management zone ----- */
+  /* ----- central fan wall directly behind the boards (per the diagram) ----- */
   const fans = new THREE.Group();
   const fanFrameM = mat(0x090b0c, 0.8, 0.2);
   const fanBladeM = mat(0x202428, 0.72, 0.25);
   for (let i = 0; i < 8; i++) {
     const x = -0.225 + i * 0.064;
-    fans.add(box(0.055, 0.05, 0.026, fanFrameM, x, 0.03, 0.29));
-    const ring = cyl(0.026, 0.026, 0.018, fanFrameM, x, 0.03, 0.29, 20);
+    fans.add(box(0.055, 0.05, 0.026, fanFrameM, x, 0.03, 0.205));
+    const ring = cyl(0.026, 0.026, 0.018, fanFrameM, x, 0.03, 0.205, 20);
     ring.rotation.x = Math.PI / 2;
     fans.add(ring);
-    const hub = cyl(0.007, 0.007, 0.021, M.steel(), x, 0.03, 0.302, 12);
+    const hub = cyl(0.007, 0.007, 0.021, M.steel(), x, 0.03, 0.217, 12);
     hub.rotation.x = Math.PI / 2;
     fans.add(hub);
     for (let b = 0; b < 5; b++) {
-      const blade = box(0.018, 0.005, 0.004, fanBladeM, x, 0.03, 0.301);
+      const blade = box(0.018, 0.005, 0.004, fanBladeM, x, 0.03, 0.216);
       blade.rotation.z = b * Math.PI * 2 / 5;
       fans.add(blade);
     }
   }
   mark(fans, 'airCooling');
   root.add(fans);
+
+  /* ----- power: centre-rear busbar clip → red 48V pair → central PDB ----- */
+  const trayPower = new THREE.Group();
+  const redFeed = mat(0xa32222, 0.5, 0.2);
+  trayPower.add(tube([[0.012, 0.03, -0.43], [0.014, 0.06, -0.1], [0.01, 0.035, 0.26]], 0.0085, redFeed, 28));
+  trayPower.add(tube([[-0.012, 0.03, -0.43], [-0.014, 0.055, -0.09], [-0.01, 0.035, 0.26]], 0.0085, redFeed, 28));
+  // central power-distribution board between the fan wall and the storage bay
+  trayPower.add(box(0.14, 0.028, 0.09, mat(0x20252a, 0.46, 0.72), 0, 0.019, 0.3));
+  for (let i = 0; i < 5; i++) trayPower.add(box(0.014, 0.012, 0.014, M.copper(), -0.05 + i * 0.025, 0.038, 0.28));
+  mark(trayPower, 'trayPower');
+  root.add(trayPower);
+
+  /* ----- daughter boards flanking the PDB (per the diagram) ----- */
+  const daughters = new THREE.Group();
+  for (const dx of [-0.17, 0.17]) {
+    daughters.add(box(0.13, 0.004, 0.07, M.pcbDark(), dx, 0.012, 0.3));
+    daughters.add(box(0.03, 0.007, 0.03, M.chipBlack(), dx, 0.017, 0.3));
+  }
+  mark(daughters, 'hmc');
+  root.add(daughters);
+
+  /* ----- braided DensiLink runs: mezzanines → around the fan wall → front ----- */
+  const cables = new THREE.Group();
+  const braidM = mat(0x191b1e, 0.85, 0.15);
+  const runs = [
+    [[-0.185, 0.03, 0.1], [-0.245, 0.065, 0.2], [-0.215, 0.03, 0.33]],
+    [[-0.07, 0.03, 0.1], [-0.03, 0.07, 0.19], [-0.09, 0.032, 0.3]],
+    [[0.07, 0.03, 0.1], [0.03, 0.07, 0.2], [0.09, 0.032, 0.3]],
+    [[0.185, 0.03, 0.1], [0.245, 0.065, 0.21], [0.215, 0.03, 0.33]],
+  ];
+  for (const pts of runs) cables.add(tube(pts, 0.011, braidM, 20));
+  mark(cables, 'connectx');
+  root.add(cables);
 
   /* ----- front I/O, inside view ----- */
   // 4x E1.S NVMe in the centre bay
