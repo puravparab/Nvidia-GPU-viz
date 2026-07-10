@@ -37,11 +37,11 @@ export function buildHbm() {
 
   /* ----- TSV columns running through the tower ----- */
   const tsvs = new THREE.Group();
-  const tsvM = mat(0xc9a227, 0.35, 0.95, { emissive: 0x3a2c05, emissiveIntensity: 0.35 });
+  const tsvM = mat(0x9e6a2a, 0.32, 0.95, { emissive: 0x2a1f06, emissiveIntensity: 0.25 });
   const colH = dieYs[LAYERS - 1] + 0.014 - baseY;
   for (let i = 0; i < 7; i++) {
     for (let j = 0; j < 4; j++) {
-      tsvs.add(cyl(0.009, 0.009, colH, tsvM, -0.24 + i * 0.08, baseY + colH / 2, -0.15 + j * 0.1, 8));
+      tsvs.add(cyl(0.006, 0.006, colH, tsvM, -0.24 + i * 0.08, baseY + colH / 2, -0.15 + j * 0.1, 8));
     }
   }
   mark(tsvs, 'hbmTsv');
@@ -49,7 +49,7 @@ export function buildHbm() {
 
   /* ----- micro-bump arrays between layers ----- */
   const bumps = new THREE.Group();
-  const bumpM = mat(0x9aa0a8, 0.3, 0.9);
+  const bumpM = mat(0x848a92, 0.3, 0.95);
   for (let l = 0; l < LAYERS; l++) {
     const y = (l === 0 ? baseY + 0.05 : dieYs[l - 1] + 0.014) + ((l === 0 ? dieYs[0] : dieYs[l]) - (l === 0 ? baseY + 0.05 : dieYs[l - 1] + 0.014)) / 2;
     for (let i = 0; i < 9; i++) {

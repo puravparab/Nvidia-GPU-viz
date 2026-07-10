@@ -69,11 +69,11 @@ export function buildGrace() {
 
   /* ----- PHY strips on the die edges ----- */
   // NVLink-C2C along the front edge (the 900 GB/s exit toward the GPUs)
-  const c2c = box(0.62, 0.023, 0.035, glowMat(GREEN, 1.1), 0, 0.051, 0.25);
+  const c2c = box(0.62, 0.023, 0.035, glowMat(GREEN, 0.85), 0, 0.051, 0.25);
   mark(c2c, 'graceC2cPhy');
   root.add(c2c);
   // LPDDR5X controllers/PHY along both side edges
-  const phyM = mat(0x3a5a8a, 0.35, 0.8, { emissive: 0x1a3a6a, emissiveIntensity: 0.35 });
+  const phyM = mat(0x28405e, 0.35, 0.8, { emissive: 0x14304f, emissiveIntensity: 0.22 });
   for (const sx of [-1, 1]) {
     const p = box(0.03, 0.023, 0.52, phyM, sx * 0.335, 0.051, -0.03);
     mark(p, 'graceMemPhy');
@@ -82,8 +82,8 @@ export function buildGrace() {
 
   /* ----- decoupling capacitors ----- */
   const caps = new THREE.Group();
-  const capM = mat(0xa08a3c, 0.4, 0.8);
-  const capM2 = mat(0x6f6961, 0.45, 0.5);
+  const capM = mat(0x6b5c2c, 0.4, 0.8);
+  const capM2 = mat(0x4c4841, 0.45, 0.5);
   let s = 13;
   const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
   for (let i = 0; i < 90; i++) {

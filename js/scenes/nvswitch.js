@@ -29,7 +29,7 @@ export function buildNvswitch() {
   root.add(die);
 
   /* ----- SerDes PHY banks along both port edges ----- */
-  const phyM = mat(0x8a7a30, 0.32, 0.85, { emissive: 0x5a4a10, emissiveIntensity: 0.4 });
+  const phyM = mat(0x6f6228, 0.32, 0.85, { emissive: 0x4a3d0e, emissiveIntensity: 0.25 });
   for (const sx of [-1, 1]) {
     const p = box(0.05, 0.023, 0.46, phyM, sx * 0.315, 0.051, 0);
     mark(p, 'nvswitchPhy');
@@ -44,8 +44,8 @@ export function buildNvswitch() {
 
   /* ----- decoupling capacitors (top & bottom rims) ----- */
   const caps = new THREE.Group();
-  const capM = mat(0xa08a3c, 0.4, 0.8);
-  const capM2 = mat(0x6f6961, 0.45, 0.5);
+  const capM = mat(0x6b5c2c, 0.4, 0.8);
+  const capM2 = mat(0x4c4841, 0.45, 0.5);
   let s = 29;
   const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
   for (let i = 0; i < 70; i++) {

@@ -15,10 +15,10 @@ export function buildBoard() {
   const root = new THREE.Group();
   const W = 0.62, D = 0.44;
 
-  const goldRim = mat(0xb99b5a, 0.38, 0.85);
+  const goldRim = mat(0x8a6d38, 0.3, 0.95);
   const lidTop = mat(0x23262b, 0.3, 0.75);
   const pkgSubM = mat(0x14161a, 0.5, 0.4);
-  const tealRing = mat(0x2e7f78, 0.42, 0.35);
+  const tealRing = mat(0x1d4a45, 0.42, 0.35);
 
   /* ----- PCB ----- */
   const pcb = new THREE.Group();
@@ -76,7 +76,7 @@ export function buildBoard() {
       const t = i / 4 - 0.5;
       const lane = new THREE.Mesh(
         laneGeo,
-        new THREE.MeshBasicMaterial({ color: GREEN, transparent: true, opacity: 0.7 })
+        new THREE.MeshBasicMaterial({ color: GREEN, transparent: true, opacity: 0.28 })
       );
       lane.position.set((x0 + x1) / 2 - t * 0.014 * Math.sign(gz), 0.012, (z0 + z1) / 2 + t * 0.016);
       lane.rotation.y = yaw;
@@ -88,9 +88,9 @@ export function buildBoard() {
 
   /* ----- VRM tile fields hugging the GPUs ----- */
   const vrm = new THREE.Group();
-  const tileA = mat(0x83898f, 0.4, 0.75);
-  const tileB = mat(0x565c63, 0.45, 0.6);
-  const tileC = mat(0x2c3036, 0.55, 0.5);
+  const tileA = mat(0x4d5359, 0.4, 0.8);
+  const tileB = mat(0x35393f, 0.45, 0.65);
+  const tileC = mat(0x24272c, 0.55, 0.5);
   let s = 3;
   const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
   const pick = () => { const r = rand(); return r > 0.55 ? tileA : (r > 0.25 ? tileB : tileC); };
@@ -112,7 +112,7 @@ export function buildBoard() {
   root.add(nvl);
   // 12V + GND RapidLock power connectors near the VRMs (yellow in the diagram)
   const rapid = new THREE.Group();
-  const yellowM = mat(0xd9b13b, 0.5, 0.4);
+  const yellowM = mat(0x8f7226, 0.42, 0.75);
   for (const [rx, rz] of [[0.29, -0.185], [0.29, 0.185], [-0.02, -0.19], [-0.02, 0.19], [-0.24, -0.115], [-0.24, 0.115], [0.02, -0.15], [0.02, 0.15]]) {
     rapid.add(box(0.024, 0.012, 0.014, yellowM, rx, 0.007, rz));
   }
@@ -121,7 +121,7 @@ export function buildBoard() {
 
   /* ----- two Mirror-Mezz connectors ahead of Grace (ConnectX mezzanine site) ----- */
   const mezzConn = new THREE.Group();
-  const mezzM = mat(0x3f6a4a, 0.5, 0.45);
+  const mezzM = mat(0x22382a, 0.5, 0.45);
   mezzConn.add(box(0.075, 0.008, 0.05, mezzM, -0.21, 0.005, -0.02));
   mezzConn.add(box(0.075, 0.008, 0.05, mezzM, -0.21, 0.005, 0.045));
   mark(mezzConn, 'connectx');
@@ -130,26 +130,27 @@ export function buildBoard() {
   /* ----- front edge: I/O cluster (per the diagram) ----- */
   const io = new THREE.Group();
   // MCIO x16 (blue), SimSAS PCIe x8 ×2 (violet), 8x connector (purple), 225W (red)
-  io.add(box(0.02, 0.012, 0.05, mat(0x2f6ea8, 0.45, 0.4), -0.295, 0.007, -0.06));
-  io.add(box(0.016, 0.01, 0.036, mat(0x6a5acd, 0.45, 0.4), -0.295, 0.006, 0.0));
-  io.add(box(0.016, 0.01, 0.036, mat(0x6a5acd, 0.45, 0.4), -0.295, 0.006, 0.05));
-  io.add(box(0.012, 0.01, 0.022, mat(0x7a4a9e, 0.45, 0.4), -0.295, 0.006, 0.095));
-  io.add(box(0.014, 0.012, 0.02, mat(0xa33030, 0.5, 0.35), -0.295, 0.007, -0.11));
+  // — real connectors are dark plastic with only a tinted key, not saturated blocks
+  io.add(box(0.02, 0.012, 0.05, mat(0x1d3a55, 0.5, 0.35), -0.295, 0.007, -0.06));
+  io.add(box(0.016, 0.01, 0.036, mat(0x2c2a48, 0.5, 0.35), -0.295, 0.006, 0.0));
+  io.add(box(0.016, 0.01, 0.036, mat(0x2c2a48, 0.5, 0.35), -0.295, 0.006, 0.05));
+  io.add(box(0.012, 0.01, 0.022, mat(0x322646, 0.5, 0.35), -0.295, 0.006, 0.095));
+  io.add(box(0.014, 0.012, 0.02, mat(0x581f1f, 0.5, 0.35), -0.295, 0.007, -0.11));
   mark(io, 'boardPcb');
   root.add(io);
   // tan Grace-Grace C2C connector: the 600 GB/s link to the sibling board
-  const gg = box(0.024, 0.014, 0.085, mat(0x9a7d5c, 0.5, 0.35), -0.255, 0.008, -0.165);
+  const gg = box(0.024, 0.014, 0.085, mat(0x51422f, 0.5, 0.35), -0.255, 0.008, -0.165);
   mark(gg, 'graceGraceLink');
   root.add(gg);
   // BMC connector (green, left edge) + CMOS battery
   const bmcM = new THREE.Group();
-  bmcM.add(box(0.016, 0.012, 0.09, mat(0x3f8a4f, 0.5, 0.4), -0.3, 0.007, 0.15));
+  bmcM.add(box(0.016, 0.012, 0.09, mat(0x24402c, 0.5, 0.4), -0.3, 0.007, 0.15));
   bmcM.add(cyl(0.012, 0.012, 0.005, M.steel(), -0.245, 0.005, 0.185, 14));
   mark(bmcM, 'hmc');
   root.add(bmcM);
   // 8-pin fan connectors along the front edge (red in the diagram)
   const fanConn = new THREE.Group();
-  const redM = mat(0xb04040, 0.5, 0.35);
+  const redM = mat(0x5c2424, 0.5, 0.35);
   for (const fx of [-0.16, -0.12, -0.08, 0.08, 0.12, 0.16]) {
     fanConn.add(box(0.024, 0.008, 0.012, redM, fx, 0.005, -0.207));
   }

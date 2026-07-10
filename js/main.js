@@ -57,13 +57,16 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
-renderer.toneMappingExposure = 1.15;
+renderer.toneMappingExposure = 1.28;
 
 const scene = new THREE.Scene();
-scene.fog = new THREE.FogExp2(0x060809, 0.045);
+scene.fog = new THREE.FogExp2(0x060809, 0.016);
 
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+// The room IBL at full strength washes every metal toward pastel; keep it as
+// a specular source only and let the directional key/fill do the shaping.
+scene.environmentIntensity = 0.55;
 
 const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 100);
 const controls = new OrbitControls(camera, canvas);
@@ -76,7 +79,7 @@ prefersReducedMotion.addEventListener('change', event => {
 });
 
 /* lights */
-const key = new THREE.DirectionalLight(0xffffff, 2.6);
+const key = new THREE.DirectionalLight(0xffffff, 3.1);
 key.position.set(4, 6, 5);
 key.castShadow = true;
 key.shadow.mapSize.set(2048, 2048);
@@ -86,16 +89,18 @@ key.shadow.bias = -0.0004;
 key.shadow.normalBias = 0.004;
 key.shadow.radius = 2;
 scene.add(key);
-const fill = new THREE.DirectionalLight(0x9db8cf, 1.1);
+const fill = new THREE.DirectionalLight(0x9db8cf, 0.7);
 fill.position.set(-5, 3, -4);
 scene.add(fill);
 const front = new THREE.DirectionalLight(0xd8e2ea, 0.8);
 front.position.set(0.5, 2, 6);
 scene.add(front);
-const rim = new THREE.PointLight(GREEN, 14, 14);
-rim.position.set(0, 2.2, -2.4);
+// Keep the green accent as a faint backdrop tint only — at higher intensity it
+// floods every glossy top surface and turns the whole model yellow-green.
+const rim = new THREE.PointLight(GREEN, 2.5, 14);
+rim.position.set(0, 2.6, -3.4);
 scene.add(rim);
-scene.add(new THREE.AmbientLight(0x49525b, 0.85));
+scene.add(new THREE.AmbientLight(0x49525b, 0.5));
 
 /* ---------------- level management ---------------- */
 let current = null;      // { group, camera, defaultInfo }

@@ -21,7 +21,7 @@ export function buildChip() {
     sub.add(box(0.012, 0.008, 0.012, ballM, -0.55 + i * 0.048, -0.002, 0.455));
   }
   // silver stiffener frame around the package rim (visible in the B200 photo)
-  const stiffM = mat(0xc8ccd2, 0.35, 0.9);
+  const stiffM = mat(0x989ea4, 0.3, 0.95);
   sub.add(box(1.16, 0.014, 0.09, stiffM, 0, 0.046, -0.425));
   sub.add(box(1.16, 0.014, 0.09, stiffM, 0, 0.046, 0.425));
   sub.add(box(0.09, 0.014, 0.76, stiffM, -0.535, 0.046, 0));
@@ -33,7 +33,7 @@ export function buildChip() {
   const mold = new THREE.Group();
   mold.add(box(0.98, 0.03, 0.66, mat(0x15181d, 0.22, 0.85), 0, 0.06, 0));
   // teal underfill/epoxy ring around the silicon (the photo's blue-green border)
-  const tealM = mat(0x2e7f78, 0.4, 0.35);
+  const tealM = mat(0x1d4a45, 0.4, 0.35);
   mold.add(box(1.0, 0.012, 0.012, tealM, 0, 0.051, -0.336));
   mold.add(box(1.0, 0.012, 0.012, tealM, 0, 0.051, 0.336));
   mold.add(box(0.012, 0.012, 0.684, tealM, -0.496, 0.051, 0));
@@ -75,8 +75,8 @@ export function buildChip() {
 
   /* ----- decoupling capacitor fields ----- */
   const caps = new THREE.Group();
-  const capM = mat(0xa08a3c, 0.4, 0.8);
-  const capM2 = mat(0x6f6961, 0.45, 0.5);
+  const capM = mat(0x6b5c2c, 0.4, 0.8);
+  const capM2 = mat(0x4c4841, 0.45, 0.5);
   let s = 17;
   const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
   for (let i = 0; i < 90; i++) {

@@ -71,7 +71,7 @@ export function buildTray() {
 
     // VRM tiles between CPU and GPU zones
     for (let i = 0; i < 6; i++) {
-      const v = box(0.014, 0.008, 0.014, mat(0x6d737a, 0.45, 0.7), -0.075 + i * 0.03, 0.006, -0.115);
+      const v = box(0.014, 0.008, 0.014, mat(0x3b4046, 0.45, 0.75), -0.075 + i * 0.03, 0.006, -0.115);
       mark(v, 'vrm');
       b.add(v);
     }
@@ -150,9 +150,11 @@ export function buildTray() {
 
   /* ----- power: centre-rear busbar clip → red 48V pair → central PDB ----- */
   const trayPower = new THREE.Group();
-  const redFeed = mat(0xa32222, 0.5, 0.2);
-  trayPower.add(tube([[0.012, 0.03, -0.43], [0.014, 0.06, -0.1], [0.01, 0.035, 0.26]], 0.0085, redFeed, 28));
-  trayPower.add(tube([[-0.012, 0.03, -0.43], [-0.014, 0.055, -0.09], [-0.01, 0.035, 0.26]], 0.0085, redFeed, 28));
+  // dark insulated 48 V pair — hugs the board channel instead of arcing over it
+  const redFeed = mat(0x571d1d, 0.6, 0.2);
+  const blkFeed = mat(0x131416, 0.7, 0.15);
+  trayPower.add(tube([[0.012, 0.024, -0.43], [0.014, 0.03, -0.1], [0.01, 0.026, 0.26]], 0.006, redFeed, 28));
+  trayPower.add(tube([[-0.012, 0.024, -0.43], [-0.014, 0.028, -0.09], [-0.01, 0.026, 0.26]], 0.006, blkFeed, 28));
   // central power-distribution board between the fan wall and the storage bay
   trayPower.add(box(0.14, 0.028, 0.09, mat(0x20252a, 0.46, 0.72), 0, 0.019, 0.3));
   for (let i = 0; i < 5; i++) trayPower.add(box(0.014, 0.012, 0.014, M.copper(), -0.05 + i * 0.025, 0.038, 0.28));
@@ -172,12 +174,12 @@ export function buildTray() {
   const cables = new THREE.Group();
   const braidM = mat(0x191b1e, 0.85, 0.15);
   const runs = [
-    [[-0.185, 0.03, 0.1], [-0.245, 0.065, 0.2], [-0.215, 0.03, 0.33]],
-    [[-0.07, 0.03, 0.1], [-0.03, 0.07, 0.19], [-0.09, 0.032, 0.3]],
-    [[0.07, 0.03, 0.1], [0.03, 0.07, 0.2], [0.09, 0.032, 0.3]],
-    [[0.185, 0.03, 0.1], [0.245, 0.065, 0.21], [0.215, 0.03, 0.33]],
+    [[-0.185, 0.026, 0.1], [-0.245, 0.032, 0.2], [-0.215, 0.026, 0.33]],
+    [[-0.07, 0.024, 0.1], [-0.03, 0.03, 0.19], [-0.09, 0.026, 0.3]],
+    [[0.07, 0.024, 0.1], [0.03, 0.03, 0.2], [0.09, 0.026, 0.3]],
+    [[0.185, 0.026, 0.1], [0.245, 0.032, 0.21], [0.215, 0.026, 0.33]],
   ];
-  for (const pts of runs) cables.add(tube(pts, 0.011, braidM, 20));
+  for (const pts of runs) cables.add(tube(pts, 0.0075, braidM, 20));
   mark(cables, 'connectx');
   root.add(cables);
 

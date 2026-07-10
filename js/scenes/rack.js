@@ -17,7 +17,7 @@ function computeTrayTemplate() {
   // body + faceplate: production DGX trays have symmetric networking bays,
   // four central E1.S carriers and a small management cluster.
   g.add(box(IW, U * 0.92, TD * 0.97, M.panelDark(), 0, 0, 0));
-  g.add(box(IW, U * 0.96, 0.012, mat(0x8b806b, 0.42, 0.72), 0, 0, FRONT));
+  g.add(box(IW, U * 0.96, 0.012, mat(0x25272a, 0.4, 0.75), 0, 0, FRONT));
   const vt = ventTexture(512, 64, '#141618', '#070808');
   vt.repeat.set(2, 1);
   const ventM = new THREE.MeshStandardMaterial({ map: vt, roughness: 0.7, metalness: 0.4 });
@@ -128,7 +128,7 @@ export function buildRack() {
   };
   const infoKeys = { compute: 'computeTray', switch: 'switchTray', power: 'powerShelf', mgmt: 'mgmtSwitch' };
 
-  const goldM = mat(0xa8894f, 0.42, 0.85);
+  const goldM = mat(0x8a6f3f, 0.3, 1.0);
   let y = yTop;
   let computeIdx = 0;
   for (const [kind, count] of plan) {

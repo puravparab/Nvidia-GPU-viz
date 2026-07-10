@@ -10,7 +10,7 @@ import { mat, glowMat, box, cyl, led, mark, ventTexture, M, GREEN } from '../com
  */
 
 const RW = 0.6, RD = 1.1, RH = 2.05;   // proxy rack footprint (m)
-const goldM = mat(0xa8894f, 0.42, 0.85);
+const goldM = mat(0x8a6f3f, 0.3, 1.0);
 
 /** An NVL72 rack proxy — dark body, gold front trim, green switch-bay glow. */
 function rackProxy(highlight = false) {
@@ -151,7 +151,7 @@ export function buildDatacenter() {
     root.add(box(rowLen + 1.0, 0.04, 0.34, basketM, 0, RH + 0.34, row.z));
   });
   for (let j = -1; j <= 1; j++) {
-    root.add(box(0.09, 0.055, 2 * podC + HOT + 1.2, mat(0x6e5f22, 0.5, 0.6), j * 2.6, RH + 0.55, 0));
+    root.add(box(0.09, 0.055, 2 * podC + HOT + 1.2, mat(0x2c2f34, 0.5, 0.7), j * 2.6, RH + 0.55, 0));
   }
 
   /* ----- floor: dark slab + grid + perforated cold-aisle tiles ----- */
