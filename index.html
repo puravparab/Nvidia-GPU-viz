@@ -25,7 +25,7 @@
 <meta name="twitter:image" content="https://nvidia-gpu-viz.pages.dev/assets/og-image.jpg" />
 <meta name="twitter:creator" content="@notpurav" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2376b900'/%3E%3C/svg%3E" />
-<link rel="stylesheet" href="css/style.css" />
+<link rel="stylesheet" href="css/style.css?v=20260710-9" />
 <script type="importmap">
 {
   "imports": {
@@ -39,20 +39,19 @@
 
 <header id="header">
   <div class="brand">
-    <span class="brand-mark"></span>
-    <h1>GB200 <span>NVL72</span></h1>
+    <h1>NVIDIA GB200 <span>NVL72</span></h1>
   </div>
-  <p id="level-subtitle">Rack-scale exaflop AI system — click any component to inspect it</p>
 </header>
 
 <nav id="breadcrumb" aria-label="Zoom level"><!-- built dynamically by main.js --></nav>
 
 <aside id="info-panel" class="hidden" aria-live="polite">
-  <button id="info-close" aria-label="Close">×</button>
   <div id="info-tag"></div>
   <h2 id="info-name"></h2>
   <p id="info-blurb"></p>
   <table id="info-specs"></table>
+  <div id="info-parts" class="hidden"></div>
+  <div id="info-sources" class="hidden"></div>
   <button id="info-drill" class="hidden"></button>
 </aside>
 
@@ -80,12 +79,18 @@
 </footer>
 
 <div id="credit">
-  Built by <a href="https://twitter.com/notpurav" target="_blank" rel="noopener">@notpurav</a>
-  <span class="credit-sep">·</span> with Claude Fable
+  <span class="credit-main">
+    Built by <a href="https://twitter.com/notpurav" target="_blank" rel="noopener">@notpurav</a>
+    <span class="credit-sep">·</span>
+    <a class="github-link" href="https://github.com/puravparab/Nvidia-GPU-viz" target="_blank" rel="noopener" aria-label="View puravparab/Nvidia-GPU-viz on GitHub" title="View source on GitHub">
+      <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 0C3.58 0 0 3.64 0 8.13c0 3.59 2.29 6.63 5.47 7.71.4.08.55-.18.55-.39 0-.19-.01-.83-.01-1.5-2.01.38-2.53-.5-2.69-.96-.09-.23-.48-.96-.82-1.15-.28-.15-.68-.53-.01-.54.63-.01 1.08.59 1.23.83.72 1.23 1.87.88 2.33.67.07-.53.28-.88.51-1.08-1.78-.21-3.64-.91-3.64-4.01 0-.88.31-1.61.82-2.18-.08-.21-.36-1.04.08-2.15 0 0 .67-.22 2.2.83A7.35 7.35 0 0 1 8 3.94c.68 0 1.36.09 2 .27 1.53-1.06 2.2-.83 2.2-.83.44 1.11.16 1.94.08 2.15.51.57.82 1.29.82 2.18 0 3.11-1.87 3.8-3.65 4.01.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.47.55.39A8.12 8.12 0 0 0 16 8.13C16 3.64 12.42 0 8 0Z"/></svg>
+    </a>
+  </span>
+  <span class="credit-note">This project is not affiliated with NVIDIA.</span>
 </div>
 
 <div id="fade"></div>
 
-<script type="module" src="js/main.js"></script>
+<script type="module" src="js/main.js?v=20260710-12"></script>
 </body>
 </html>

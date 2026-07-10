@@ -5,43 +5,43 @@
 export const TOUR = [
   {
     level: 'rack', info: 'rack',
-    pos: [1.55, 1.6, 3.35], target: [0, 1.05, 0],
-    text: 'This is one GB200 NVL72 — a full rack that behaves like a single 72-GPU accelerator. Everything in it is liquid-cooled, and the whole thing draws about 120 kW.',
+    pos: [1.85, 1.9, 4.05], target: [0, 1.2, 0],
+    text: 'This is one GB200 NVL72 — a full rack that behaves like a single 72-GPU accelerator. The high-power silicon is liquid-cooled while lower-power components remain air-cooled; rack draw is about 120 kW.',
   },
   {
     level: 'rack', info: 'computeTray',
     pos: [0.75, 1.55, 1.5], target: [0, 1.42, 0.4],
-    text: 'The workhorses: 18 slim 1U compute trays. Each holds two GB200 superchips — four Blackwell GPUs and two Grace CPUs — and slides out like a drawer, with no cables to unplug.',
+    text: 'The workhorses: 18 slim 1U compute trays. Each holds two GB200 superchips—four Blackwell GPUs and two Grace CPUs—and slides out through blind-mate power, coolant, and NVLink connections.',
   },
   {
     level: 'rack', info: 'switchTray',
     pos: [0.65, 1.1, 1.35], target: [0, 0.97, 0.4],
-    text: 'The nine NVLink switch trays in the middle stitch all 72 GPUs into one fabric. Any GPU can talk to any other at 1.8 TB/s — that is what makes the rack one big GPU.',
+    text: 'The nine NVLink switch trays stitch all 72 GPUs into one fabric. Each Blackwell GPU has up to 1.8 TB/s of bidirectional NVLink connectivity, giving the rack one 72-GPU scale-up domain.',
   },
   {
     level: 'switchtray', info: 'nvswitchPackage',
     pos: [0.5, 0.6, 0.8], target: [0, 0, -0.05],
-    text: 'Pop one open: two NVLink 5 switch ASICs, 50 billion transistors each, spent entirely on moving data — 7.2 TB/s per chip, with SHARP engines doing math inside the network.',
+    text: 'Pop one open: the 1U tray contains two NVLink 5 switch ASICs with 72 ports each. NVIDIA rates the tray at 57.6 Tb/s full duplex, and SHARP engines accelerate collective operations inside the network.',
   },
   {
     level: 'rack', info: 'powerShelf',
     pos: [0.8, 2.0, 1.4], target: [0, 1.8, 0.3],
-    text: 'Eight power shelves convert facility AC into 48 V DC, 33 kW each, using hot-swappable supply modules with N+1 redundancy.',
+    text: 'Eight power shelves convert facility AC into nominal 50–51 V DC, 33 kW each. Six hot-swappable modules per shelf provide N+N rack-level redundancy.',
   },
   {
     level: 'rack', info: 'spine',
     pos: [-2.4, 1.7, -3.0], target: [0, 1.0, -0.3],
-    text: 'Around the back: the copper busbar that powers every tray, the coolant manifolds, and the NVLink spine — more than 5,000 copper cables, roughly two miles of wire.',
+    text: 'Around the back: the copper busbar that powers the rack, the liquid-cooling manifolds, and four NVLink cartridges containing more than 5,000 coaxial copper cables.',
   },
   {
     level: 'tray', info: 'computeTray',
     pos: [0.55, 0.62, 0.85], target: [0, 0, 0],
-    text: 'Inside a compute tray with the lid off. Two GB200 boards sit side by side; the silver cold plates hide the silicon underneath.',
+    text: 'Inside a compute tray with the lid off. Two GB200 boards sit side by side; black production cold-plate assemblies hide the Grace and Blackwell packages underneath.',
   },
   {
     level: 'tray', info: 'coolantLoop',
     pos: [0.3, 0.38, -0.42], target: [0, 0.02, -0.12],
-    text: 'Coolant flows through those plates and out through dripless quick-disconnects at the rear — no fans are needed for the main silicon.',
+    text: 'Coolant flows through those plates and connects to the rack manifolds at the rear. A central fan wall still cools storage, management, and other lower-power components.',
   },
   {
     level: 'tray', info: 'connectx',
@@ -50,23 +50,23 @@ export const TOUR = [
   },
   {
     level: 'board', info: 'graceCpu',
-    pos: [0.12, 0.3, 0.38], target: [0, 0, 0.08],
-    text: 'The bare GB200 superchip board. In front sits the Grace CPU: 72 Arm cores ringed by 480 GB of LPDDR5X memory.',
+    pos: [-0.09, 0.33, 0.4], target: [-0.09, 0, 0],
+    text: 'The bare GB200 superchip board. Under the silver lid on the centreline sits the Grace CPU: 72 Arm cores flanked by banks of LPDDR5X memory.',
   },
   {
     level: 'grace', info: 'graceDie',
     pos: [0.75, 0.95, 1.2], target: [0, 0.02, 0],
-    text: 'The Grace die up close: 72 identical Neoverse V2 core tiles on a mesh, 117 MB of L3, and PHY strips on the edges where 900 GB/s leaves for the GPUs.',
+    text: 'The Grace die up close: 72 Neoverse V2 cores connected by NVIDIA’s Scalable Coherency Fabric, with 114 MB of L3 cache. The raised tile layout is an architectural illustration, not a published floorplan.',
   },
   {
     level: 'board', info: 'c2cLink',
-    pos: [0.28, 0.3, 0.22], target: [0.06, 0, 0.02],
-    text: 'The glowing lanes are NVLink-C2C: 900 GB/s of cache-coherent bandwidth that fuses CPU and GPU memory into a single pool.',
+    pos: [0.05, 0.32, 0.3], target: [0.05, 0, 0],
+    text: 'The glowing lanes represent NVLink-C2C: up to 900 GB/s of aggregate coherent connectivity across the Grace CPU and the two Blackwell GPUs.',
   },
   {
     level: 'board', info: 'b200Package',
-    pos: [0.3, 0.22, 0.1], target: [0.17, 0, -0.05],
-    text: 'And the stars of the show: two Blackwell B200 packages. Let’s zoom into one.',
+    pos: [0.38, 0.24, 0.28], target: [0.16, 0, 0.02],
+    text: 'And the stars of the show: two Blackwell B200 packages side by side at the rear edge, next to the blind-mate connectors. Let’s zoom into one.',
   },
   {
     level: 'chip', info: 'gpuDie',
@@ -76,21 +76,26 @@ export const TOUR = [
   {
     level: 'chip', info: 'nvhbi',
     pos: [0.05, 0.75, 0.75], target: [0, 0.07, 0],
-    text: 'The green seam is NV-HBI, a 10 TB/s die-to-die bridge. It is fast enough that software sees one giant GPU, not two chiplets.',
+    text: 'The green seam represents NV-HBI, the 10 TB/s die-to-die link that lets software see the two Blackwell dies as one unified GPU.',
   },
   {
     level: 'chip', info: 'hbmStack',
     pos: [1.15, 0.8, 0.95], target: [0.35, 0.08, 0],
-    text: 'Eight HBM3e towers — each a stack of eight DRAM dies — feed the GPU 8 TB/s of memory bandwidth. 72 of these packages fill the rack you started at.',
+    text: 'Eight HBM3e packages feed the GPU with up to 8 TB/s of memory bandwidth and expose 186 GB of usable capacity. Seventy-two B200 packages fill the rack you started at.',
   },
   {
     level: 'hbm', info: 'hbmTsv',
     pos: [1.3, 1.1, 1.7], target: [0, 0.65, 0],
-    text: 'Peel one open: eight DRAM dies on a logic base, stitched together by thousands of through-silicon vias — the vertical wiring that makes 8 TB/s possible.',
+    text: 'Peel one open: the illustrated eight-high DRAM stack sits on a logic base and is stitched together by through-silicon vias—the vertical wiring that makes HBM bandwidth possible.',
   },
   {
     level: 'rack', info: 'rack',
-    pos: [2.1, 1.75, 2.9], target: [0, 1.05, 0],
-    text: 'That’s the GB200 NVL72 — from a 120 kW rack down to nanometre silicon. Explore freely: every component is clickable.',
+    pos: [2.25, 1.95, 3.85], target: [0, 1.2, 0],
+    text: 'That’s the GB200 NVL72 — from a 120 kW rack down to nanometre silicon. One more step back…',
+  },
+  {
+    level: 'datacenter', info: 'datacenter',
+    pos: [6.5, 5.2, 8.5], target: [0, 0.8, 0],
+    text: 'And one last step back: in production, this rack is a single tile. Rows of NVL72s, coolant distribution units and a scale-out fabric fuse tens of thousands of GPUs into one AI factory. Explore freely: every component is clickable.',
   },
 ];

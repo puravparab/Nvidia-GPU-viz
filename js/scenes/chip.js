@@ -1,12 +1,61 @@
 import * as THREE from 'three';
-import { mat, glowMat, box, slab, mark, dieTexture, M, GREEN } from '../common.js';
+import { mat, glowMat, box, slab, mark, M, GREEN } from '../common.js';
+
+/** Blackwell compute-die texture per NVIDIA's labelled die shot: maroon GPC
+ *  blocks around a central L2 column, HBM controller bands along the sides
+ *  that face the HBM stacks, NVLink/C2C strip across one end. */
+function blackwellDieTexture(seed) {
+  const cv = document.createElement('canvas');
+  cv.width = 256; cv.height = 448;
+  const ctx = cv.getContext('2d');
+  let s = seed;
+  const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  const speckle = (x, y, w, h, r, g, b) => {
+    for (let i = 0; i < w * h / 90; i++) {
+      const k = 0.75 + rand() * 0.5;
+      ctx.fillStyle = `rgba(${r * k | 0},${g * k | 0},${b * k | 0},0.6)`;
+      ctx.fillRect(x + rand() * (w - 5), y + rand() * (h - 3), 2 + rand() * 6, 1 + rand() * 4);
+    }
+  };
+  ctx.fillStyle = '#241a20';
+  ctx.fillRect(0, 0, 256, 448);
+  // HBM controller bands along both long edges
+  for (const x0 of [0, 232]) {
+    ctx.fillStyle = '#57452b';
+    ctx.fillRect(x0, 6, 24, 436);
+    speckle(x0, 6, 24, 436, 120, 100, 60);
+  }
+  // NVLink strip across one end, C2C across the other
+  ctx.fillStyle = '#4a3d55';
+  ctx.fillRect(28, 0, 200, 26);
+  ctx.fillRect(28, 422, 200, 26);
+  // 2×4 GPC blocks with a thin L2 column between the two columns
+  for (let cx = 0; cx < 2; cx++) {
+    for (let cy = 0; cy < 4; cy++) {
+      const x = 30 + cx * 102, y = 32 + cy * 97;
+      ctx.fillStyle = '#5c3648';
+      ctx.fillRect(x, y, 94, 91);
+      speckle(x, y, 94, 91, 140, 80, 110);
+    }
+  }
+  ctx.fillStyle = '#3a2f42';
+  ctx.fillRect(126, 32, 6, 384);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  return tex;
+}
 
 /**
  * Blackwell B200 package, macro view:
- * substrate → CoWoS interposer → 2 reticle-limit dies + NV-HBI seam → 8 HBM3e stacks.
+ * substrate → CoWoS advanced package → 2 reticle-limit dies + NV-HBI seam → 8 HBM3e stacks.
  */
 export function buildChip() {
   const root = new THREE.Group();
+  // The package is made from many sub-millimetre layers. Disabling dynamic
+  // shadows here prevents shadow-map texels from crawling across those edges
+  // as the camera auto-rotates; direct/environment lighting still applies.
+  root.userData.disableShadows = true;
 
   /* ----- substrate ----- */
   const sub = new THREE.Group();
@@ -16,65 +65,69 @@ export function buildChip() {
   for (let i = 0; i < 24; i++) {
     sub.add(box(0.012, 0.008, 0.012, ballM, -0.55 + i * 0.048, -0.002, 0.455));
   }
+  // silver stiffener frame around the package rim (visible in the B200 photo)
+  const stiffM = mat(0x989ea4, 0.3, 0.95);
+  sub.add(box(1.16, 0.014, 0.09, stiffM, 0, 0.046, -0.425));
+  sub.add(box(1.16, 0.014, 0.09, stiffM, 0, 0.046, 0.425));
+  sub.add(box(0.09, 0.014, 0.76, stiffM, -0.535, 0.046, 0));
+  sub.add(box(0.09, 0.014, 0.76, stiffM, 0.535, 0.046, 0));
   mark(sub, 'substrate');
   root.add(sub);
 
-  /* ----- CoWoS interposer ----- */
-  const inter = box(1.04, 0.02, 0.68, mat(0x565c66, 0.32, 0.9), 0, 0.055, 0);
-  mark(inter, 'interposer');
-  root.add(inter);
+  /* ----- CoWoS-L molded body: dies + HBM sit nearly FLUSH (per the photo) ----- */
+  const mold = new THREE.Group();
+  mold.add(box(0.98, 0.03, 0.66, mat(0x15181d, 0.22, 0.85), 0, 0.06, 0));
+  // teal underfill/epoxy ring around the silicon (the photo's blue-green border)
+  const tealM = mat(0x1d4a45, 0.4, 0.35);
+  mold.add(box(1.0, 0.012, 0.012, tealM, 0, 0.051, -0.336));
+  mold.add(box(1.0, 0.012, 0.012, tealM, 0, 0.051, 0.336));
+  mold.add(box(0.012, 0.012, 0.684, tealM, -0.496, 0.051, 0));
+  mold.add(box(0.012, 0.012, 0.684, tealM, 0.496, 0.051, 0));
+  mark(mold, 'interposer');
+  root.add(mold);
 
-  /* ----- two compute dies ----- */
-  const t1 = dieTexture(512, 512, '#10141d', 5);
-  const t2 = dieTexture(512, 512, '#10141d', 23);
+  /* ----- two compute dies: barely proud of the molding, glossy ----- */
+  const t1 = blackwellDieTexture(5);
+  const t2 = blackwellDieTexture(23);
   for (const [dx, tex] of [[-0.155, t1], [0.155, t2]]) {
     const dm = new THREE.MeshStandardMaterial({
-      map: tex, roughness: 0.28, metalness: 0.8,
-      emissive: 0x2a3550, emissiveIntensity: 0.3, emissiveMap: tex,
+      map: tex, roughness: 0.18, metalness: 0.8,
+      emissive: 0xffffff, emissiveIntensity: 0.1, emissiveMap: tex,
     });
-    const die = box(0.29, 0.022, 0.5, dm, dx, 0.075, 0);
+    const die = box(0.29, 0.007, 0.5, dm, dx, 0.0785, 0);
     mark(die, 'gpuDie');
     root.add(die);
   }
 
-  /* ----- NV-HBI die-to-die bridge (the glowing seam) ----- */
-  const hbi = box(0.024, 0.023, 0.5, glowMat(GREEN, 1.5), 0, 0.075, 0);
+  /* ----- NV-HBI die-to-die bridge: a subtle glowing seam, near-flush ----- */
+  const hbi = box(0.016, 0.0075, 0.5, glowMat(GREEN, 0.55), 0, 0.0788, 0);
   mark(hbi, 'nvhbi');
   root.add(hbi);
 
-  /* ----- 8 HBM3e stacks (2×2 per side) ----- */
-  const layerM = mat(0x24272c, 0.4, 0.7);
-  const topM = mat(0x31353c, 0.3, 0.8);
+  /* ----- 8 HBM3e stacks: flat molded tiles, 2×2 per side ----- */
+  const hbmM = mat(0x24272c, 0.26, 0.75);
   for (const sx of [-1, 1]) {
     for (let col = 0; col < 2; col++) {
       for (let row = 0; row < 2; row++) {
-        const stack = new THREE.Group();
-        // both columns stay on the interposer (x ±0.52), clear of the dies (±0.30)
-        const x = sx * (0.358 + col * 0.106);
+        const x = sx * (0.348 + col * 0.094);
         const z = -0.155 + row * 0.31;
-        // 8-high stacked DRAM dies — visible layering
-        for (let l = 0; l < 8; l++) {
-          stack.add(box(0.10, 0.0052, 0.26, l === 7 ? topM : layerM, x, 0.068 + l * 0.0062, z));
-        }
-        // base logic die slightly wider
-        stack.add(box(0.106, 0.006, 0.266, mat(0x1c1f24, 0.45, 0.6), x, 0.062, z));
-        mark(stack, 'hbmStack');
-        root.add(stack);
+        const tile = box(0.085, 0.006, 0.26, hbmM, x, 0.078, z);
+        mark(tile, 'hbmStack');
+        root.add(tile);
       }
     }
   }
 
   /* ----- decoupling capacitor fields ----- */
   const caps = new THREE.Group();
-  const capM = mat(0xa08a3c, 0.4, 0.8);
-  const capM2 = mat(0x6f6961, 0.45, 0.5);
+  const capM = mat(0x6b5c2c, 0.4, 0.8);
+  const capM2 = mat(0x4c4841, 0.45, 0.5);
   let s = 17;
   const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
-  for (let i = 0; i < 120; i++) {
-    const edge = Math.floor(rand() * 4);
-    let x, z;
-    if (edge < 2) { x = (rand() - 0.5) * 1.04; z = (edge === 0 ? -1 : 1) * (0.37 + rand() * 0.06); }
-    else { x = (edge === 2 ? -1 : 1) * (0.545 + rand() * 0.025); z = (rand() - 0.5) * 0.6; }
+  for (let i = 0; i < 90; i++) {
+    // narrow bands between the interposer edge and the stiffener frame
+    const x = (rand() - 0.5) * 0.92;
+    const z = (rand() > 0.5 ? -1 : 1) * (0.345 + rand() * 0.028);
     caps.add(box(0.014, 0.007, 0.008, rand() > 0.5 ? capM : capM2, x, 0.049, z));
   }
   mark(caps, 'capacitors');
@@ -91,15 +144,19 @@ export function buildChip() {
   ctx.fillText('NVIDIA B200', 20, 58);
   ctx.font = '400 26px system-ui, sans-serif';
   ctx.fillStyle = 'rgba(180,195,205,0.6)';
-  ctx.fillText('BLACKWELL · 208B XTORS · CoWoS-L', 20, 100);
+  ctx.fillText('BLACKWELL · 208B XTORS · CoWoS', 20, 100);
   const labelTex = new THREE.CanvasTexture(cv);
   labelTex.colorSpace = THREE.SRGBColorSpace;
+  // etched onto the front stiffener rail
   const label = new THREE.Mesh(
-    new THREE.PlaneGeometry(0.46, 0.115),
-    new THREE.MeshBasicMaterial({ map: labelTex, transparent: true })
+    new THREE.PlaneGeometry(0.34, 0.075),
+    new THREE.MeshBasicMaterial({
+      map: labelTex, transparent: true,
+      polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+    })
   );
   label.rotation.x = -Math.PI / 2;
-  label.position.set(-0.30, 0.0468, 0.41);
+  label.position.set(-0.35, 0.056, 0.425);
   root.add(label);
 
   /* ----- shadow disc ----- */
