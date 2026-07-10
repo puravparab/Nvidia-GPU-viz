@@ -81,7 +81,7 @@ export function buildTray() {
 
     /* --- coolant loop: braided steel hoses, rear quick-disconnects --- */
     const loop = new THREE.Group();
-    const tubeM = mat(0x9da4a9, 0.5, 0.75);
+    const tubeM = mat(0x6f757a, 0.45, 0.8);
     loop.add(tube([
       [bx - 0.035, 0.035, -0.44], [bx - 0.06, 0.038, -0.36], [bx - 0.06, 0.032, -0.3],
     ], 0.008, tubeM));
