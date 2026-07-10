@@ -69,8 +69,9 @@ export function buildSwitchTray() {
   root.add(exposed);
 
   /* ----- short board-level link headers feeding the rear connector field ----- */
+  // pale cyan cable loops, as in NVIDIA's switch-tray photo
   const bundles = new THREE.Group();
-  const linkM = mat(0x1d2226, 0.58, 0.5);
+  const linkM = mat(0x6fa3b5, 0.5, 0.35);
   for (const ax of [-0.115, 0.115]) {
     for (let i = 0; i < 4; i++) {
       const spread = (i - 1.5) * 0.052;

@@ -126,6 +126,10 @@ function setLevel(level, { instant = false, panelKey = null, cam = null } = {}) 
           o.receiveShadow = shadowsEnabled;
         }
       });
+      // every clickable component in this scene, for the panel's part list
+      const seen = new Set();
+      cache[level].group.traverse(o => { if (o.userData.infoKey && INFO[o.userData.infoKey]) seen.add(o.userData.infoKey); });
+      cache[level].parts = [...seen];
     }
     current = cache[level];
     currentLevel = level;
@@ -144,7 +148,7 @@ function setLevel(level, { instant = false, panelKey = null, cam = null } = {}) 
     controls.update(0);
 
     // grounded scenes use fog for depth; close-up scenes float in the void
-    scene.fog.density = { rack: 0.045, datacenter: 0.02 }[level] ?? 0.0;
+    scene.fog.density = { rack: 0.018, datacenter: 0.012 }[level] ?? 0.0;
 
     // widen shadow coverage for the big datacenter scene, tight for close-ups
     const shadowExtent = level === 'datacenter' ? 12 : 3;
@@ -381,6 +385,24 @@ const elBlurb = document.getElementById('info-blurb');
 const elSpecs = document.getElementById('info-specs');
 const elSources = document.getElementById('info-sources');
 const elDrill = document.getElementById('info-drill');
+const elParts = document.getElementById('info-parts');
+
+function renderParts(activeKey) {
+  const keys = (current?.parts ?? []).filter(k => k !== currentLevel);
+  if (keys.length < 2) {
+    elParts.replaceChildren();
+    elParts.classList.add('hidden');
+    return;
+  }
+  elParts.innerHTML = '<span>In this view</span>' + keys
+    .map(k => `<button class="part-chip${k === activeKey ? ' active' : ''}" data-key="${k}">${INFO[k].name}</button>`)
+    .join('');
+  elParts.classList.remove('hidden');
+}
+elParts.addEventListener('click', e => {
+  const chip = e.target.closest('.part-chip');
+  if (chip) showPanel(chip.dataset.key);
+});
 
 function showPanel(key, { auto = false } = {}) {
   const info = INFO[key];
@@ -405,10 +427,10 @@ function showPanel(key, { auto = false } = {}) {
   } else {
     elDrill.classList.add('hidden');
   }
+  renderParts(key);
   panel.classList.remove('hidden');
 }
 function hidePanel() { panel.classList.add('hidden'); }
-document.getElementById('info-close').addEventListener('click', hidePanel);
 
 /* ---------------- loop ---------------- */
 window.addEventListener('resize', () => {

@@ -11,55 +11,34 @@ import { mat, box, cyl, slab, mark, M, GREEN } from '../common.js';
  * cluster, the tan Grace-Grace C2C connector, BMC, CMOS battery and fan
  * headers.
  */
-/** Gold "exposed die" texture matching NVIDIA's Bianca render: two large
- *  bronze compute dies centre, flanked by slimmer HBM columns. */
-function b200DieTexture() {
+/** Brushed nickel heat-spreader texture with a faint etched NVIDIA marking,
+ *  matching the bare production Bianca board photo. */
+function lidTexture(label) {
   const cv = document.createElement('canvas');
   cv.width = cv.height = 256;
   const ctx = cv.getContext('2d');
-  ctx.fillStyle = '#4a3d1f';
+  ctx.fillStyle = '#a9adb2';
   ctx.fillRect(0, 0, 256, 256);
-  let s = 11;
+  let s = 19;
   const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
-  // HBM columns along left and right edges
-  for (const x0 of [6, 216]) {
-    for (let j = 0; j < 4; j++) {
-      ctx.fillStyle = j % 2 ? '#6b5a2c' : '#75622f';
-      ctx.fillRect(x0, 8 + j * 61, 34, 55);
-    }
+  // subtle mottling like the nickel plating in the photo
+  for (let i = 0; i < 60; i++) {
+    const g = 158 + Math.floor(rand() * 22);
+    ctx.fillStyle = `rgba(${g},${g + 2},${g + 5},0.35)`;
+    ctx.beginPath();
+    ctx.ellipse(rand() * 256, rand() * 256, 12 + rand() * 40, 8 + rand() * 26, rand() * 3, 0, Math.PI * 2);
+    ctx.fill();
   }
-  // two compute dies side by side in the middle
-  for (const x0 of [48, 132]) {
-    ctx.fillStyle = '#8a7434';
-    ctx.fillRect(x0, 10, 76, 236);
-    for (let i = 0; i < 40; i++) {
-      const g = 120 + Math.floor(rand() * 50);
-      ctx.fillStyle = `rgb(${g},${g - 22},${40 + Math.floor(rand() * 18)})`;
-      ctx.fillRect(x0 + 4 + rand() * 62, 14 + rand() * 222, 4 + rand() * 12, 3 + rand() * 9);
-    }
-  }
+  ctx.fillStyle = 'rgba(120,124,128,0.55)';
+  ctx.font = '600 30px system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText(label, 128, 118);
+  ctx.font = '400 18px system-ui, sans-serif';
+  ctx.fillStyle = 'rgba(120,124,128,0.4)';
+  ctx.fillText('T TW 2425', 128, 152);
   const tex = new THREE.CanvasTexture(cv);
   tex.colorSpace = THREE.SRGBColorSpace;
   tex.anisotropy = 4;
-  return tex;
-}
-
-/** Small iridescent mosaic for the Grace die window in NVIDIA's render. */
-function graceWindowTexture() {
-  const cv = document.createElement('canvas');
-  cv.width = cv.height = 64;
-  const ctx = cv.getContext('2d');
-  let s = 5;
-  const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
-  const cols = ['#3f7a2e', '#63a02f', '#b07f2a', '#8f4f22', '#2e6f5f', '#c9a43a'];
-  for (let x = 0; x < 8; x++) {
-    for (let y = 0; y < 8; y++) {
-      ctx.fillStyle = cols[Math.floor(rand() * cols.length)];
-      ctx.fillRect(x * 8, y * 8, 8, 8);
-    }
-  }
-  const tex = new THREE.CanvasTexture(cv);
-  tex.colorSpace = THREE.SRGBColorSpace;
   return tex;
 }
 
@@ -79,30 +58,29 @@ export function buildBoard() {
   mark(pcb, 'boardPcb');
   root.add(pcb);
 
-  /* ----- two Blackwell B200 packages (rear): exposed gold dies in a thin
-     gold stiffener frame on a black substrate, per NVIDIA's board render ----- */
-  const b200DieM = new THREE.MeshStandardMaterial({
-    map: b200DieTexture(), roughness: 0.28, metalness: 0.85,
+  /* ----- two Blackwell B200 packages (rear): bare nickel heat spreaders on
+     a slim gold substrate rim, per the production board photo ----- */
+  const b200LidM = new THREE.MeshStandardMaterial({
+    map: lidTexture('NVIDIA'), roughness: 0.3, metalness: 0.85,
   });
   for (const gz of [-0.105, 0.105]) {
     const pkg = new THREE.Group();
     pkg.position.set(0.155, 0, gz);
     pkg.add(slab(0.15, 0.006, 0.15, 0.005, pkgSubM, 0, 0, 0));
-    pkg.add(slab(0.138, 0.004, 0.138, 0.004, goldRim, 0, 0.006, 0));
-    pkg.add(box(0.126, 0.006, 0.126, b200DieM, 0, 0.009, 0));
+    pkg.add(slab(0.142, 0.003, 0.142, 0.004, goldRim, 0, 0.006, 0));
+    pkg.add(box(0.134, 0.007, 0.134, b200LidM, 0, 0.009, 0));
     mark(pkg, 'b200Package');
     root.add(pkg);
   }
 
-  /* ----- Grace CPU package: dark lid with a small iridescent die window ----- */
+  /* ----- Grace CPU package: same bare nickel lid, etched 894-A2 ----- */
+  const graceLidM = new THREE.MeshStandardMaterial({
+    map: lidTexture('894-A2'), roughness: 0.3, metalness: 0.85,
+  });
   const grace = new THREE.Group();
   grace.position.set(-0.09, 0, 0);
   grace.add(slab(0.14, 0.005, 0.14, 0.005, pkgSubM, 0, 0, 0));
-  grace.add(slab(0.126, 0.007, 0.126, 0.004, mat(0x1e2126, 0.32, 0.8), 0, 0.005, 0));
-  grace.add(box(0.052, 0.004, 0.052, new THREE.MeshStandardMaterial({
-    map: graceWindowTexture(), roughness: 0.25, metalness: 0.6,
-    emissive: 0xffffff, emissiveMap: graceWindowTexture(), emissiveIntensity: 0.22,
-  }), 0, 0.013, 0));
+  grace.add(box(0.124, 0.008, 0.124, graceLidM, 0, 0.005, 0));
   mark(grace, 'graceCpu');
   root.add(grace);
 
@@ -142,9 +120,10 @@ export function buildBoard() {
 
   /* ----- VRM tile fields hugging the GPUs ----- */
   const vrm = new THREE.Group();
-  const tileA = mat(0x4d5359, 0.4, 0.8);
-  const tileB = mat(0x35393f, 0.45, 0.65);
-  const tileC = mat(0x24272c, 0.55, 0.5);
+  // light-grey power chokes ("85M" blocks in the production photo)
+  const tileA = mat(0x6e747b, 0.42, 0.75);
+  const tileB = mat(0x565c63, 0.45, 0.65);
+  const tileC = mat(0x3a3f45, 0.55, 0.5);
   let s = 3;
   const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
   const pick = () => { const r = rand(); return r > 0.55 ? tileA : (r > 0.25 ? tileB : tileC); };
@@ -174,8 +153,9 @@ export function buildBoard() {
   root.add(rapid);
 
   /* ----- two Mirror-Mezz connectors ahead of Grace (ConnectX mezzanine site) ----- */
+  // gold pin-grid arrays in the production photo
   const mezzConn = new THREE.Group();
-  const mezzM = mat(0x1a2a20, 0.5, 0.45);
+  const mezzM = mat(0x8a743a, 0.48, 0.8);
   mezzConn.add(box(0.075, 0.008, 0.05, mezzM, -0.21, 0.005, -0.02));
   mezzConn.add(box(0.075, 0.008, 0.05, mezzM, -0.21, 0.005, 0.045));
   mark(mezzConn, 'connectx');

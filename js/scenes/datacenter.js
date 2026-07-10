@@ -154,6 +154,34 @@ export function buildDatacenter() {
     root.add(box(0.09, 0.055, 2 * podC + HOT + 1.2, mat(0x2c2f34, 0.5, 0.7), j * 2.6, RH + 0.55, 0));
   }
 
+  /* ----- facility coolant loop: red/blue piping snaking along the pods to
+     the CDUs at floor level, per NVIDIA's NVL72 compute-racks slide ----- */
+  const pipes = new THREE.Group();
+  const supplyM = mat(0x4a7fa8, 0.4, 0.6);
+  const returnM = mat(0xa85252, 0.4, 0.6);
+  const pipeRun = (m, y, z) => {
+    const p = cyl(0.045, 0.045, rowLen + 1.6, m, 0, y, z, 12);
+    p.rotation.z = Math.PI / 2;
+    pipes.add(p);
+  };
+  for (const cz of [-podC, podC]) {
+    pipeRun(supplyM, 0.09, cz - 0.14);
+    pipeRun(returnM, 0.09, cz + 0.14);
+    // riser elbows at both row ends
+    for (const ex of [-1, 1]) {
+      pipes.add(cyl(0.045, 0.045, 0.5, supplyM, ex * (rowLen / 2 + 0.8), 0.25, cz - 0.14, 12));
+      pipes.add(cyl(0.045, 0.045, 0.5, returnM, ex * (rowLen / 2 + 0.8), 0.25, cz + 0.14, 12));
+    }
+  }
+  // cross-feed from the in-row CDU column to both pods
+  for (const [m, dx] of [[supplyM, -0.14], [returnM, 0.14]]) {
+    const c = cyl(0.045, 0.045, 2 * podC + HOT, m, colX(cduCol) + dx, 0.09, 0, 12);
+    c.rotation.x = Math.PI / 2;
+    pipes.add(c);
+  }
+  mark(pipes, 'cdu');
+  root.add(pipes);
+
   /* ----- floor: dark slab + grid + perforated cold-aisle tiles ----- */
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(46, 46), mat(0x0a0c0d, 0.9, 0.15));
   floor.rotation.x = -Math.PI / 2;
