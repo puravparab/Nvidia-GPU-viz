@@ -2,9 +2,9 @@ import * as THREE from 'three';
 import { mat, box, cyl, mark, M } from '../common.js';
 
 /**
- * Exploded HBM3e stack: base logic die, eight DRAM dies floating above it,
- * TSV columns running vertically through the whole tower, and micro-bump
- * arrays between the layers.
+ * Illustrative exploded HBM3e stack: base logic die, eight representative
+ * DRAM layers, TSV columns through the tower, and micro-bump arrays between
+ * layers. NVIDIA does not publish the shipped B200 stack layer count.
  */
 export function buildHbm() {
   const root = new THREE.Group();

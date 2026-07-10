@@ -96,14 +96,19 @@ export function dieTexture(w = 512, h = 512, base = '#12161f', seed = 7) {
     }
   }
   // fine bus lines
-  ctx.globalAlpha = 0.35;
+  // Keep the bus grid below pixel frequency at oblique angles; the denser
+  // version shimmered as an auto-rotating die crossed mip levels.
+  ctx.globalAlpha = 0.2;
   ctx.strokeStyle = '#3a4a66';
   ctx.lineWidth = 1;
-  for (let x = 0; x < w; x += 8) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+  for (let x = 0; x < w; x += 16) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
   ctx.globalAlpha = 1;
   const tex = new THREE.CanvasTexture(cv);
   tex.colorSpace = THREE.SRGBColorSpace;
-  tex.anisotropy = 4;
+  tex.minFilter = THREE.LinearMipmapLinearFilter;
+  tex.magFilter = THREE.LinearFilter;
+  tex.generateMipmaps = true;
+  tex.anisotropy = 2;
   return tex;
 }
 

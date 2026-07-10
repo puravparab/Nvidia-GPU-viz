@@ -3,10 +3,14 @@ import { mat, glowMat, box, slab, mark, dieTexture, M, GREEN } from '../common.j
 
 /**
  * Blackwell B200 package, macro view:
- * substrate → CoWoS interposer → 2 reticle-limit dies + NV-HBI seam → 8 HBM3e stacks.
+ * substrate → CoWoS advanced package → 2 reticle-limit dies + NV-HBI seam → 8 HBM3e stacks.
  */
 export function buildChip() {
   const root = new THREE.Group();
+  // The package is made from many sub-millimetre layers. Disabling dynamic
+  // shadows here prevents shadow-map texels from crawling across those edges
+  // as the camera auto-rotates; direct/environment lighting still applies.
+  root.userData.disableShadows = true;
 
   /* ----- substrate ----- */
   const sub = new THREE.Group();
@@ -25,7 +29,7 @@ export function buildChip() {
   mark(sub, 'substrate');
   root.add(sub);
 
-  /* ----- CoWoS interposer ----- */
+  /* ----- CoWoS advanced-package routing layer ----- */
   const inter = box(1.04, 0.02, 0.68, mat(0x565c66, 0.32, 0.9), 0, 0.055, 0);
   mark(inter, 'interposer');
   root.add(inter);
@@ -96,16 +100,19 @@ export function buildChip() {
   ctx.fillText('NVIDIA B200', 20, 58);
   ctx.font = '400 26px system-ui, sans-serif';
   ctx.fillStyle = 'rgba(180,195,205,0.6)';
-  ctx.fillText('BLACKWELL · 208B XTORS · CoWoS-L', 20, 100);
+  ctx.fillText('BLACKWELL · 208B XTORS · CoWoS', 20, 100);
   const labelTex = new THREE.CanvasTexture(cv);
   labelTex.colorSpace = THREE.SRGBColorSpace;
   // etched onto the front stiffener rail
   const label = new THREE.Mesh(
     new THREE.PlaneGeometry(0.34, 0.075),
-    new THREE.MeshBasicMaterial({ map: labelTex, transparent: true })
+    new THREE.MeshBasicMaterial({
+      map: labelTex, transparent: true,
+      polygonOffset: true, polygonOffsetFactor: -2, polygonOffsetUnits: -2,
+    })
   );
   label.rotation.x = -Math.PI / 2;
-  label.position.set(-0.35, 0.0537, 0.425);
+  label.position.set(-0.35, 0.056, 0.425);
   root.add(label);
 
   /* ----- shadow disc ----- */

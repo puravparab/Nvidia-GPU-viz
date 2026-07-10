@@ -35,8 +35,24 @@ const CRUMB_LABELS = {
 
 /* ---------------- renderer / scene ---------------- */
 const canvas = document.getElementById('scene');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+const renderer = new THREE.WebGLRenderer({
+  canvas, antialias: true, alpha: true, powerPreference: 'high-performance',
+});
+
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+const isNarrowViewport = () => window.innerWidth <= 700;
+const renderPixelRatio = () => Math.min(window.devicePixelRatio, isNarrowViewport() ? 1.5 : 2);
+const PORTRAIT_VIEW_SCALE = {
+  datacenter: 1.25, rack: 1.12,
+  tray: 1.85, switchtray: 1.85, board: 1.85,
+  chip: 2.0, grace: 1.8, nvswitch: 1.8, hbm: 1.7,
+};
+const responsiveViewScale = (level = 'rack') => {
+  if (window.innerWidth > 700) return 1;
+  return window.innerHeight > window.innerWidth ? (PORTRAIT_VIEW_SCALE[level] ?? 1.5) : 1.12;
+};
+
+renderer.setPixelRatio(renderPixelRatio());
 renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
@@ -53,8 +69,11 @@ const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerH
 const controls = new OrbitControls(camera, canvas);
 controls.enableDamping = true;
 controls.dampingFactor = 0.08;
-controls.autoRotate = true;
+controls.autoRotate = !prefersReducedMotion.matches && !isNarrowViewport();
 controls.autoRotateSpeed = 0.6;
+prefersReducedMotion.addEventListener('change', event => {
+  if (event.matches) controls.autoRotate = false;
+});
 
 /* lights */
 const key = new THREE.DirectionalLight(0xffffff, 2.6);
@@ -64,6 +83,8 @@ key.shadow.mapSize.set(2048, 2048);
 key.shadow.camera.left = key.shadow.camera.bottom = -3;
 key.shadow.camera.right = key.shadow.camera.top = 3;
 key.shadow.bias = -0.0004;
+key.shadow.normalBias = 0.004;
+key.shadow.radius = 2;
 scene.add(key);
 const fill = new THREE.DirectionalLight(0x9db8cf, 1.1);
 fill.position.set(-5, 3, -4);
@@ -80,6 +101,7 @@ scene.add(new THREE.AmbientLight(0x49525b, 0.85));
 let current = null;      // { group, camera, defaultInfo }
 let currentLevel = 'rack';
 const cache = {};
+let lastViewScale = responsiveViewScale(currentLevel);
 
 const fadeEl = document.getElementById('fade');
 const subtitleEl = document.getElementById('level-subtitle');
@@ -92,10 +114,11 @@ function setLevel(level, { instant = false, panelKey = null, cam = null } = {}) 
 
     if (!cache[level]) {
       cache[level] = BUILDERS[level]();
+      const shadowsEnabled = !cache[level].group.userData.disableShadows;
       cache[level].group.traverse(o => {
         if (o.isMesh && !cache[level].group.userData.noHighlight?.has(o.id)) {
-          o.castShadow = true;
-          o.receiveShadow = true;
+          o.castShadow = shadowsEnabled;
+          o.receiveShadow = shadowsEnabled;
         }
       });
     }
@@ -106,9 +129,14 @@ function setLevel(level, { instant = false, panelKey = null, cam = null } = {}) 
     const c = current.camera;
     camera.position.set(...(cam?.pos ?? c.pos));
     controls.target.set(...(cam?.target ?? c.target));
+    lastViewScale = responsiveViewScale(level);
+    camera.position.sub(controls.target).multiplyScalar(lastViewScale).add(controls.target);
+    camera.near = Math.max(0.02, c.min * 0.05);
+    camera.far = Math.max(20, c.max * 4);
+    camera.updateProjectionMatrix();
     controls.minDistance = c.min;
-    controls.maxDistance = c.max;
-    controls.update();
+    controls.maxDistance = c.max * lastViewScale;
+    controls.update(0);
 
     // grounded scenes use fog for depth; close-up scenes float in the void
     scene.fog.density = { rack: 0.045, datacenter: 0.02 }[level] ?? 0.0;
@@ -117,6 +145,8 @@ function setLevel(level, { instant = false, panelKey = null, cam = null } = {}) 
     const shadowExtent = level === 'datacenter' ? 12 : 3;
     key.shadow.camera.left = key.shadow.camera.bottom = -shadowExtent;
     key.shadow.camera.right = key.shadow.camera.top = shadowExtent;
+    key.shadow.camera.near = 0.5;
+    key.shadow.camera.far = level === 'datacenter' ? 40 : 20;
     key.shadow.camera.updateProjectionMatrix();
 
     subtitleEl.textContent = LEVELS[level].subtitle;
@@ -152,14 +182,21 @@ function renderBreadcrumb() {
       if (b.dataset.level !== currentLevel) setLevel(b.dataset.level);
     });
   });
+  if (isNarrowViewport()) {
+    requestAnimationFrame(() => {
+      breadcrumbEl.querySelector('.crumb.active')?.scrollIntoView({ block: 'nearest', inline: 'center' });
+    });
+  }
 }
 
 /* ---------------- camera fly-to ---------------- */
 let camTween = null;
 function flyTo(pos, target, dur = 1.15) {
+  const t1 = new THREE.Vector3(...target);
+  const p1 = new THREE.Vector3(...pos).sub(t1).multiplyScalar(responsiveViewScale(currentLevel)).add(t1);
   camTween = {
     p0: camera.position.clone(), t0: controls.target.clone(),
-    p1: new THREE.Vector3(...pos), t1: new THREE.Vector3(...target),
+    p1, t1,
     start: performance.now(), dur: dur * 1000,
   };
 }
@@ -337,6 +374,7 @@ const elTag = document.getElementById('info-tag');
 const elName = document.getElementById('info-name');
 const elBlurb = document.getElementById('info-blurb');
 const elSpecs = document.getElementById('info-specs');
+const elSources = document.getElementById('info-sources');
 const elDrill = document.getElementById('info-drill');
 
 function showPanel(key, { auto = false } = {}) {
@@ -346,6 +384,15 @@ function showPanel(key, { auto = false } = {}) {
   elName.textContent = info.name;
   elBlurb.textContent = info.blurb;
   elSpecs.innerHTML = info.specs.map(([k, v]) => `<tr><td>${k}</td><td>${v}</td></tr>`).join('');
+  if (info.sources?.length) {
+    elSources.innerHTML = '<span>Sources</span>' + info.sources
+      .map(([label, url]) => `<a href="${url}" target="_blank" rel="noopener noreferrer">${label} ↗</a>`)
+      .join('');
+    elSources.classList.remove('hidden');
+  } else {
+    elSources.replaceChildren();
+    elSources.classList.add('hidden');
+  }
   if (info.drill && info.drill !== currentLevel) {
     elDrill.textContent = info.drillLabel;
     elDrill.classList.remove('hidden');
@@ -360,9 +407,17 @@ document.getElementById('info-close').addEventListener('click', hidePanel);
 
 /* ---------------- loop ---------------- */
 window.addEventListener('resize', () => {
+  const nextViewScale = responsiveViewScale(currentLevel);
+  if (current && nextViewScale !== lastViewScale) {
+    camera.position.sub(controls.target).multiplyScalar(nextViewScale / lastViewScale).add(controls.target);
+    controls.maxDistance = current.camera.max * nextViewScale;
+    lastViewScale = nextViewScale;
+  }
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
+  renderer.setPixelRatio(renderPixelRatio());
   renderer.setSize(window.innerWidth, window.innerHeight);
+  if (prefersReducedMotion.matches || isNarrowViewport()) controls.autoRotate = false;
 });
 
 // deep link support: /#grace, /#hbm, /#switchtray, ...
@@ -373,8 +428,11 @@ window.addEventListener('hashchange', () => {
   if (BUILDERS[l] && l !== currentLevel && tourIdx < 0) setLevel(l);
 });
 
-function tick() {
+let previousFrame = performance.now();
+function tick(now) {
   requestAnimationFrame(tick);
+  const deltaSeconds = Math.min((now - previousFrame) / 1000, 0.05);
+  previousFrame = now;
   if (camTween) {
     const k = Math.min(1, (performance.now() - camTween.start) / camTween.dur);
     const e = easeInOut(k);
@@ -382,11 +440,12 @@ function tick() {
     controls.target.lerpVectors(camTween.t0, camTween.t1, e);
     if (k >= 1) camTween = null;
   }
-  controls.update();
+  // Passing elapsed time keeps auto-rotation smooth when frame rate varies.
+  controls.update(deltaSeconds);
   if (pointerMoved && !downPos) {
     setHover(pick());
     pointerMoved = false;
   }
   renderer.render(scene, camera);
 }
-tick();
+requestAnimationFrame(tick);

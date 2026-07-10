@@ -66,7 +66,7 @@ export function buildNvswitch() {
   ctx.fillText('NVLINK 5 SWITCH', 20, 56);
   ctx.font = '400 26px system-ui, sans-serif';
   ctx.fillStyle = 'rgba(180,195,205,0.6)';
-  ctx.fillText('72 PORTS · 7.2 TB/s · TSMC 4NP', 20, 98);
+  ctx.fillText('72 PORTS · Σ 7.2 TB/s · TSMC 4NP', 20, 98);
   const labelTex = new THREE.CanvasTexture(cv);
   labelTex.colorSpace = THREE.SRGBColorSpace;
   const label = new THREE.Mesh(

@@ -5,13 +5,13 @@
 export const TOUR = [
   {
     level: 'rack', info: 'rack',
-    pos: [1.55, 1.6, 3.35], target: [0, 1.05, 0],
-    text: 'This is one GB200 NVL72 — a full rack that behaves like a single 72-GPU accelerator. Everything in it is liquid-cooled, and the whole thing draws about 120 kW.',
+    pos: [1.85, 1.9, 4.05], target: [0, 1.2, 0],
+    text: 'This is one GB200 NVL72 — a full rack that behaves like a single 72-GPU accelerator. The high-power silicon is liquid-cooled while lower-power components remain air-cooled; rack draw is about 120 kW.',
   },
   {
     level: 'rack', info: 'computeTray',
     pos: [0.75, 1.55, 1.5], target: [0, 1.42, 0.4],
-    text: 'The workhorses: 18 slim 1U compute trays. Each holds two GB200 superchips — four Blackwell GPUs and two Grace CPUs — and slides out like a drawer, with no cables to unplug.',
+    text: 'The workhorses: 18 slim 1U compute trays. Each holds two GB200 superchips—four Blackwell GPUs and two Grace CPUs—and slides out through blind-mate power, coolant, and NVLink connections.',
   },
   {
     level: 'rack', info: 'switchTray',
@@ -21,12 +21,12 @@ export const TOUR = [
   {
     level: 'switchtray', info: 'nvswitchPackage',
     pos: [0.5, 0.6, 0.8], target: [0, 0, -0.05],
-    text: 'Pop one open: two NVLink 5 switch ASICs, 50 billion transistors each, spent entirely on moving data — 7.2 TB/s per chip, with SHARP engines doing math inside the network.',
+    text: 'Pop one open: two NVLink 5 switch ASICs, 50 billion transistors each. Seventy-two advertised 100 GB/s bidirectional ports sum to 7.2 TB/s per chip, with SHARP engines doing math inside the network.',
   },
   {
     level: 'rack', info: 'powerShelf',
     pos: [0.8, 2.0, 1.4], target: [0, 1.8, 0.3],
-    text: 'Eight power shelves convert facility AC into 48 V DC, 33 kW each, using hot-swappable supply modules with N+1 redundancy.',
+    text: 'Eight power shelves convert facility AC into nominal 50–51 V DC, 33 kW each. Six hot-swappable modules per shelf provide N+N rack-level redundancy.',
   },
   {
     level: 'rack', info: 'spine',
@@ -36,12 +36,12 @@ export const TOUR = [
   {
     level: 'tray', info: 'computeTray',
     pos: [0.55, 0.62, 0.85], target: [0, 0, 0],
-    text: 'Inside a compute tray with the lid off. Two GB200 boards sit side by side; the silver cold plates hide the silicon underneath.',
+    text: 'Inside a compute tray with the lid off. Two GB200 boards sit side by side; black production cold-plate assemblies hide the Grace and Blackwell packages underneath.',
   },
   {
     level: 'tray', info: 'coolantLoop',
     pos: [0.3, 0.38, -0.42], target: [0, 0.02, -0.12],
-    text: 'Coolant flows through those plates and out through dripless quick-disconnects at the rear — no fans are needed for the main silicon.',
+    text: 'Coolant flows through those plates and out through dripless quick-disconnects at the rear. A central fan wall still cools storage, management, and other lower-power components.',
   },
   {
     level: 'tray', info: 'connectx',
@@ -61,7 +61,7 @@ export const TOUR = [
   {
     level: 'board', info: 'c2cLink',
     pos: [0.05, 0.32, 0.3], target: [0.05, 0, 0],
-    text: 'The glowing lanes are NVLink-C2C: 900 GB/s of cache-coherent bandwidth that fuses CPU and GPU memory into a single pool.',
+    text: 'The glowing lanes are NVLink-C2C: 450 GB/s to each GPU, 900 GB/s aggregate, with cache coherence across the Grace and Blackwell memory domains.',
   },
   {
     level: 'board', info: 'b200Package',
@@ -81,16 +81,16 @@ export const TOUR = [
   {
     level: 'chip', info: 'hbmStack',
     pos: [1.15, 0.8, 0.95], target: [0.35, 0.08, 0],
-    text: 'Eight HBM3e towers — each a stack of eight DRAM dies — feed the GPU 8 TB/s of memory bandwidth. 72 of these packages fill the rack you started at.',
+    text: 'Eight HBM3e towers feed the GPU up to 8 TB/s of memory bandwidth and expose 186 GB of usable capacity. Seventy-two B200 packages fill the rack you started at.',
   },
   {
     level: 'hbm', info: 'hbmTsv',
     pos: [1.3, 1.1, 1.7], target: [0, 0.65, 0],
-    text: 'Peel one open: eight DRAM dies on a logic base, stitched together by thousands of through-silicon vias — the vertical wiring that makes 8 TB/s possible.',
+    text: 'Peel one open: the illustrated eight-high DRAM stack sits on a logic base and is stitched together by through-silicon vias—the vertical wiring that makes HBM bandwidth possible.',
   },
   {
     level: 'rack', info: 'rack',
-    pos: [2.1, 1.75, 2.9], target: [0, 1.05, 0],
+    pos: [2.25, 1.95, 3.85], target: [0, 1.2, 0],
     text: 'That’s the GB200 NVL72 — from a 120 kW rack down to nanometre silicon. One more step back…',
   },
   {

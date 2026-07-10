@@ -2,10 +2,10 @@ import * as THREE from 'three';
 import { mat, box, cyl, slab, led, tube, mark, dieTexture, M, GREEN } from '../common.js';
 
 /**
- * NVLink switch tray, lid removed — matched to NVIDIA's GTC display unit:
- * the two NVLink 5 switch ASICs sit SIDE-BY-SIDE in the rear half, each
- * fanning four teal NVLink cable bundles back to the blind-mate connectors.
- * Red/black 48 V feeds run down the centerline from the busbar clamp.
+ * NVLink switch tray, lid removed — matched to NVIDIA's production top view:
+ * the two NVLink 5 switch ASICs sit side-by-side in the rear half, beside a
+ * dense gray liquid-cooling loop and the rear blind-mate connector field.
+ * Red/black 50 V feeds run down the centerline from the busbar clamp.
  * One ASIC keeps its cold plate, one is exposed to show the silicon.
  * Front of tray = +Z.
  */
@@ -42,7 +42,7 @@ export function buildSwitchTray() {
   covered.position.set(-0.115, 0.008, -0.16);
   covered.add(slab(0.13, 0.005, 0.13, 0.005, M.substrate(), 0, 0, 0));
   const plate1 = new THREE.Group();
-  plate1.add(slab(0.12, 0.022, 0.12, 0.008, M.nickel(), 0, 0.005, 0));
+  plate1.add(slab(0.12, 0.022, 0.12, 0.008, mat(0xaeb4b8, 0.34, 0.88), 0, 0.005, 0));
   for (let i = 0; i < 4; i++) {
     plate1.add(box(0.095, 0.004, 0.014, mat(0xaeb3b9, 0.32, 0.95), 0, 0.028, -0.045 + i * 0.03));
   }
@@ -68,27 +68,27 @@ export function buildSwitchTray() {
   mark(exposed, 'nvswitchPackage');
   root.add(exposed);
 
-  /* ----- teal NVLink cable bundles: 4 per ASIC, fanning to the rear ----- */
+  /* ----- short board-level link headers feeding the rear connector field ----- */
   const bundles = new THREE.Group();
-  const tealM = mat(0x2fb8ac, 0.55, 0.15);
+  const linkM = mat(0x1d2226, 0.58, 0.5);
   for (const ax of [-0.115, 0.115]) {
     for (let i = 0; i < 4; i++) {
       const spread = (i - 1.5) * 0.052;
       bundles.add(tube([
         [ax + spread * 0.35, 0.026, -0.225],
-        [ax + spread * 0.8, 0.05, -0.32],
+        [ax + spread * 0.8, 0.035, -0.32],
         [ax + spread, 0.028, -0.415],
-      ], 0.009, tealM, 24));
+      ], 0.006, linkM, 24));
       // cable-header block on top of the package edge
       bundles.add(box(0.022, 0.012, 0.02, mat(0x22262b, 0.45, 0.6), ax + spread * 0.35, 0.026, -0.215));
     }
   }
-  mark(bundles, 'spine');
+  mark(bundles, 'swBackplane');
   root.add(bundles);
 
-  /* ----- 48 V feeds: red + black cables down the centerline ----- */
+  /* ----- nominal 50 V feeds: orange + black cables down the centerline ----- */
   const power = new THREE.Group();
-  power.add(tube([[0.012, 0.03, -0.43], [0.014, 0.055, -0.2], [0.01, 0.03, 0.09]], 0.0085, mat(0xa32222, 0.5, 0.2), 24));
+  power.add(tube([[0.012, 0.03, -0.43], [0.014, 0.055, -0.2], [0.01, 0.03, 0.09]], 0.0085, mat(0xc35d24, 0.46, 0.55), 24));
   power.add(tube([[-0.012, 0.03, -0.43], [-0.014, 0.05, -0.19], [-0.01, 0.03, 0.1]], 0.0085, M.rubber(), 24));
   // heatsinked power modules where the feeds land
   power.add(box(0.05, 0.022, 0.06, mat(0x1a1c1f, 0.45, 0.7), 0.035, 0.017, 0.13));
@@ -111,9 +111,13 @@ export function buildSwitchTray() {
 
   /* ----- coolant loop: rear QDs feeding the ASIC plates ----- */
   const loop = new THREE.Group();
-  const tubeM = M.rubber();
-  loop.add(tube([[-0.2, 0.035, -0.42], [-0.15, 0.04, -0.3], [-0.115, 0.032, -0.24]], 0.0075, tubeM));
-  loop.add(tube([[0.2, 0.035, -0.42], [0.16, 0.04, -0.3], [0.115, 0.032, -0.24]], 0.0075, tubeM));
+  const tubeM = mat(0xa2a9ae, 0.48, 0.78);
+  loop.add(tube([[-0.2, 0.035, -0.42], [-0.15, 0.05, -0.31], [-0.115, 0.04, -0.24]], 0.0075, tubeM));
+  loop.add(tube([[0.2, 0.035, -0.42], [0.16, 0.05, -0.31], [0.115, 0.04, -0.24]], 0.0075, tubeM));
+  // Return branches loop around the power-distribution board as in the
+  // production tray, where rigid gray plumbing is the dominant visual cue.
+  loop.add(tube([[-0.115, 0.042, -0.10], [-0.18, 0.055, 0.02], [-0.18, 0.04, 0.28], [-0.20, 0.035, -0.42]], 0.007, tubeM, 30));
+  loop.add(tube([[0.115, 0.042, -0.10], [0.18, 0.055, 0.02], [0.18, 0.04, 0.28], [0.20, 0.035, -0.42]], 0.007, tubeM, 30));
   for (const [qx, col] of [[-0.2, M.blueTube()], [0.2, M.redTube()]]) {
     const qd = cyl(0.011, 0.011, 0.045, col, qx, 0.035, -0.435, 12);
     qd.rotation.x = Math.PI / 2;

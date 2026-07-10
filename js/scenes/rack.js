@@ -14,45 +14,39 @@ function computeTrayTemplate() {
   const g = new THREE.Group();
   const fz = FRONT + 0.006;
 
-  // body + faceplate: full perforated mesh face (per the STH front photo)
+  // body + faceplate: production DGX trays have symmetric networking bays,
+  // four central E1.S carriers and a small management cluster.
   g.add(box(IW, U * 0.92, TD * 0.97, M.panelDark(), 0, 0, 0));
-  g.add(box(IW, U * 0.96, 0.012, M.panelMid(), 0, 0, FRONT));
+  g.add(box(IW, U * 0.96, 0.012, mat(0x8b806b, 0.42, 0.72), 0, 0, FRONT));
   const vt = ventTexture(512, 64, '#141618', '#070808');
-  vt.repeat.set(8, 1);
-  g.add(box(IW * 0.94, U * 0.82, 0.002, new THREE.MeshStandardMaterial({ map: vt, roughness: 0.7, metalness: 0.4 }), 0, 0, fz - 0.001));
+  vt.repeat.set(2, 1);
+  const ventM = new THREE.MeshStandardMaterial({ map: vt, roughness: 0.7, metalness: 0.4 });
 
-  // left: stacked OSFP cage pair
-  for (const y of [0.0085, -0.0085]) {
-    g.add(box(0.036, 0.012, 0.010, M.steel(), -0.225, y, fz));
-    g.add(box(0.03, 0.008, 0.004, mat(0x050505, 0.9, 0.1), -0.225, y, fz + 0.006));
+  // Mirrored BlueField-3 + ConnectX-7 port groups on the two outer thirds.
+  for (const side of [-1, 1]) {
+    const cx = side * 0.19;
+    g.add(box(0.118, U * 0.78, 0.003, ventM.clone(), cx, 0, fz - 0.001));
+    for (const ox of [-0.024, 0.024]) {
+      for (const py of [-0.008, 0.008]) {
+        g.add(box(0.038, 0.012, 0.010, M.steel(), cx + ox, py, fz));
+        g.add(box(0.032, 0.008, 0.004, mat(0x05080a, 0.9, 0.1), cx + ox, py, fz + 0.006));
+      }
+    }
+    g.add(box(0.014, 0.011, 0.008, mat(0xd8dde2, 0.35, 0.8), cx - side * 0.052, 0.009, fz));
   }
 
-  // 4x E1.S NVMe latches
+  // Four E1.S NVMe latches occupy the centre bay.
   for (let i = 0; i < 4; i++) {
-    const x = -0.165 + i * 0.03;
-    g.add(box(0.018, U * 0.68, 0.008, mat(0x25282c, 0.4, 0.7), x, 0, fz));
-    g.add(box(0.012, 0.005, 0.004, M.steel(), x, -U * 0.2, fz + 0.005));
+    const x = -0.058 + i * 0.028;
+    g.add(box(0.022, U * 0.72, 0.008, mat(0x25282c, 0.4, 0.7), x, 0, fz));
+    g.add(box(0.015, 0.005, 0.004, M.steel(), x, -U * 0.21, fz + 0.005));
   }
 
-  // centre: management cluster (RJ45s + USB, silver like the photo)
-  g.add(box(0.013, 0.011, 0.008, mat(0xd8dde2, 0.35, 0.8), -0.02, 0.002, fz));
-  g.add(box(0.013, 0.011, 0.008, mat(0xd8dde2, 0.35, 0.8), 0.02, 0.002, fz));
-  g.add(box(0.014, 0.006, 0.006, M.steel(), 0, -0.001, fz));
-
-  // right: stacked InfiniBand OSFP pair + mgmt RJ45 + far-right cage pair
-  for (const y of [0.0085, -0.0085]) {
-    g.add(box(0.036, 0.012, 0.010, M.steel(), 0.085, y, fz));
-    g.add(box(0.03, 0.008, 0.004, mat(0x0a1c30, 0.7, 0.2), 0.085, y, fz + 0.006));
-  }
-  g.add(box(0.013, 0.011, 0.008, mat(0x2f6ea8, 0.4, 0.5), 0.14, 0.002, fz));
-  for (const x of [0.19, 0.23]) {
-    g.add(box(0.032, 0.012, 0.010, M.steel(), x, 0.002, fz));
-    g.add(box(0.026, 0.008, 0.004, mat(0x050505, 0.9, 0.1), x, 0.002, fz + 0.006));
-  }
-
-  // status LEDs
-  g.add(led(0.0028, GREEN, 0.165, 0.009, fz + 0.004));
-  g.add(led(0.002, 0x2299ff, 0.165, -0.004, fz + 0.004));
+  // BMC / USB / display / console cluster sits just right of the drive bay.
+  g.add(box(0.014, 0.011, 0.008, mat(0x2f6ea8, 0.4, 0.5), 0.074, 0.006, fz));
+  g.add(box(0.012, 0.006, 0.007, M.steel(), 0.094, 0.007, fz));
+  g.add(box(0.009, 0.005, 0.006, M.steel(), 0.094, -0.005, fz));
+  g.add(led(0.0026, GREEN, 0.074, -0.009, fz + 0.004));
   return g;
 }
 
@@ -113,15 +107,14 @@ function mgmtSwitchTemplate() {
 export function buildRack() {
   const root = new THREE.Group();
 
-  // ----- slot plan, top → bottom (matches DGX GB200 elevation) -----
+  // ----- 48U slot plan, top → bottom (NVIDIA Mission Control layout) -----
   const plan = [
-    ['mgmt', 1], ['power', 4], ['blank', 1],
-    ['compute', 10], ['blank', 1],
-    ['switch', 9], ['blank', 1],
-    ['compute', 8], ['blank', 1],
-    ['power', 4],
+    ['blank', 3], ['mgmt', 2], ['blank', 1],
+    ['power', 4], ['blank', 1],
+    ['compute', 10], ['switch', 9], ['compute', 8],
+    ['blank', 1], ['power', 4], ['blank', 5],
   ];
-  const totalU = plan.reduce((s, [, n]) => s + n, 0); // 40U of gear
+  const totalU = plan.reduce((s, [, n]) => s + n, 0); // full 48U elevation
   const plinth = 0.13;
   const topPad = 0.03;
   const H = totalU * U;                    // gear stack height
@@ -141,8 +134,8 @@ export function buildRack() {
   for (const [kind, count] of plan) {
     for (let i = 0; i < count; i++) {
       y -= U;
-      // gold separator bar under each slot — the DGX GB200's signature trim
-      root.add(box(IW, 0.0035, 0.016, goldM, 0, y + 0.002, FRONT + 0.004));
+      // Subtle rack-unit separator; the champagne bezel frames whole bays.
+      root.add(box(IW, 0.0015, 0.012, mat(0x27292b, 0.55, 0.6), 0, y + 0.001, FRONT + 0.003));
       if (kind === 'blank') {
         const b = box(IW, U * 0.9, 0.008, mat(0x0b0c0d, 0.6, 0.5), 0, y + U / 2, FRONT);
         mark(b, 'rackFrame');
@@ -173,12 +166,23 @@ export function buildRack() {
   frame.add(box(0.012, fh - plinth, TD + 0.16, sideM, -px - 0.02, plinth + (fh - plinth) / 2, (pzF + pzR) / 2 + 0.02));
   frame.add(box(0.012, fh - plinth, TD + 0.16, sideM, px + 0.02, plinth + (fh - plinth) / 2, (pzF + pzR) / 2 + 0.02));
   // gold side rails framing the tray bays (per the STH front photo)
-  frame.add(box(0.014, H + 0.03, 0.02, goldM, -IW / 2 - 0.012, plinth + topPad + H / 2, FRONT + 0.006));
-  frame.add(box(0.014, H + 0.03, 0.02, goldM, IW / 2 + 0.012, plinth + topPad + H / 2, FRONT + 0.006));
-  // rounded gold bezel bar with black NVIDIA badge insert at the top
-  frame.add(box(IW + 0.04, 0.035, 0.024, goldM, 0, yTop + 0.012, FRONT + 0.004));
-  frame.add(box(IW - 0.05, 0.024, 0.006, mat(0x0c0d0e, 0.5, 0.5), 0, yTop + 0.012, FRONT + 0.018));
-  frame.add(box(0.05, 0.006, 0.002, glowMat(GREEN, 0.9), 0.16, yTop + 0.012, FRONT + 0.022));
+  const bayTop = yTop - 11 * U;
+  const bayBottom = yTop - 38 * U;
+  const bayMid = (bayTop + bayBottom) / 2;
+  frame.add(box(0.018, bayTop - bayBottom + 0.025, 0.024, goldM, -IW / 2 - 0.012, bayMid, FRONT + 0.006));
+  frame.add(box(0.018, bayTop - bayBottom + 0.025, 0.024, goldM, IW / 2 + 0.012, bayMid, FRONT + 0.006));
+  frame.add(box(IW + 0.04, 0.022, 0.024, goldM, 0, bayTop + 0.011, FRONT + 0.006));
+  frame.add(box(IW + 0.04, 0.022, 0.024, goldM, 0, bayBottom - 0.011, FRONT + 0.006));
+  // Smaller bezel around the pair of top-of-rack management switches.
+  const torMid = yTop - 4 * U;
+  frame.add(box(0.018, 2.25 * U, 0.024, goldM, -IW / 2 - 0.012, torMid, FRONT + 0.006));
+  frame.add(box(0.018, 2.25 * U, 0.024, goldM, IW / 2 + 0.012, torMid, FRONT + 0.006));
+  frame.add(box(IW + 0.04, 0.018, 0.024, goldM, 0, torMid + 1.125 * U, FRONT + 0.006));
+  frame.add(box(IW + 0.04, 0.018, 0.024, goldM, 0, torMid - 1.125 * U, FRONT + 0.006));
+  // leak/drip pan below the lowest power-shelf bay
+  const drip = box(IW + 0.03, 0.014, TD * 0.96, mat(0x59636a, 0.38, 0.85), 0, plinth + U * 0.6, 0);
+  mark(drip, 'leakTray');
+  frame.add(drip);
   mark(frame, 'rackFrame');
   root.add(frame);
 
@@ -192,8 +196,8 @@ export function buildRack() {
   mark(bus, 'busbar');
   rear.add(bus);
 
-  // NVLink cable spine — central perforated cartridge column (per the STH
-  // rear photo): four mesh-faced sections, a centre seam, gold edge rails
+  // Four NVLink cable cartridges — central perforated column (per NVIDIA's
+  // rear diagrams): four mesh-faced sections, a centre seam, gold edge rails
   const spine = new THREE.Group();
   const spineH = 28 * U; // spans compute + switch bays
   const spineY = plinth + topPad + H - (5 + 1 + 14) * U; // roughly centred on switch bay
@@ -276,7 +280,7 @@ export function buildRack() {
 
   return {
     group: root,
-    camera: { pos: [1.55, 1.6, 3.35], target: [0, 1.05, 0], min: 1.2, max: 8 },
+    camera: { pos: [1.85, 1.9, 4.05], target: [0, 1.2, 0], min: 1.4, max: 9 },
     defaultInfo: 'rack',
   };
 }
