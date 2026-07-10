@@ -73,7 +73,12 @@ illustrative model, not CAD data.
 
 ## Credits
 
-Built by [@notpurav](https://twitter.com/notpurav) with Claude Fable.
+Built by [@notpurav](https://twitter.com/notpurav).
+
+This is an unofficial, independent fan project for educational purposes. It is **not
+affiliated with, authorized, or endorsed by NVIDIA Corporation**. "NVIDIA", "GB200",
+"NVL72", "Grace", "Blackwell" and related marks are trademarks of NVIDIA. All geometry
+is an illustrative approximation, not official CAD.
 
 ## Structure
 
