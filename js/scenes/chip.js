@@ -1,5 +1,50 @@
 import * as THREE from 'three';
-import { mat, glowMat, box, slab, mark, dieTexture, M, GREEN } from '../common.js';
+import { mat, glowMat, box, slab, mark, M, GREEN } from '../common.js';
+
+/** Blackwell compute-die texture per NVIDIA's labelled die shot: maroon GPC
+ *  blocks around a central L2 column, HBM controller bands along the sides
+ *  that face the HBM stacks, NVLink/C2C strip across one end. */
+function blackwellDieTexture(seed) {
+  const cv = document.createElement('canvas');
+  cv.width = 256; cv.height = 448;
+  const ctx = cv.getContext('2d');
+  let s = seed;
+  const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
+  const speckle = (x, y, w, h, r, g, b) => {
+    for (let i = 0; i < w * h / 90; i++) {
+      const k = 0.75 + rand() * 0.5;
+      ctx.fillStyle = `rgba(${r * k | 0},${g * k | 0},${b * k | 0},0.6)`;
+      ctx.fillRect(x + rand() * (w - 5), y + rand() * (h - 3), 2 + rand() * 6, 1 + rand() * 4);
+    }
+  };
+  ctx.fillStyle = '#241a20';
+  ctx.fillRect(0, 0, 256, 448);
+  // HBM controller bands along both long edges
+  for (const x0 of [0, 232]) {
+    ctx.fillStyle = '#57452b';
+    ctx.fillRect(x0, 6, 24, 436);
+    speckle(x0, 6, 24, 436, 120, 100, 60);
+  }
+  // NVLink strip across one end, C2C across the other
+  ctx.fillStyle = '#4a3d55';
+  ctx.fillRect(28, 0, 200, 26);
+  ctx.fillRect(28, 422, 200, 26);
+  // 2×4 GPC blocks with a thin L2 column between the two columns
+  for (let cx = 0; cx < 2; cx++) {
+    for (let cy = 0; cy < 4; cy++) {
+      const x = 30 + cx * 102, y = 32 + cy * 97;
+      ctx.fillStyle = '#5c3648';
+      ctx.fillRect(x, y, 94, 91);
+      speckle(x, y, 94, 91, 140, 80, 110);
+    }
+  }
+  ctx.fillStyle = '#3a2f42';
+  ctx.fillRect(126, 32, 6, 384);
+  const tex = new THREE.CanvasTexture(cv);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 4;
+  return tex;
+}
 
 /**
  * Blackwell B200 package, macro view:
@@ -42,12 +87,12 @@ export function buildChip() {
   root.add(mold);
 
   /* ----- two compute dies: barely proud of the molding, glossy ----- */
-  const t1 = dieTexture(512, 512, '#10141d', 5);
-  const t2 = dieTexture(512, 512, '#10141d', 23);
+  const t1 = blackwellDieTexture(5);
+  const t2 = blackwellDieTexture(23);
   for (const [dx, tex] of [[-0.155, t1], [0.155, t2]]) {
     const dm = new THREE.MeshStandardMaterial({
-      map: tex, roughness: 0.18, metalness: 0.85,
-      emissive: 0x2a3550, emissiveIntensity: 0.18, emissiveMap: tex,
+      map: tex, roughness: 0.18, metalness: 0.8,
+      emissive: 0xffffff, emissiveIntensity: 0.1, emissiveMap: tex,
     });
     const die = box(0.29, 0.007, 0.5, dm, dx, 0.0785, 0);
     mark(die, 'gpuDie');

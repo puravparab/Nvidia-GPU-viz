@@ -182,6 +182,30 @@ export function buildDatacenter() {
   mark(pipes, 'cdu');
   root.add(pipes);
 
+  /* ----- far-field: the rest of the data hall, revealed on zoom-out.
+     Cheap row proxies (one box per row + glow strip) replicate the pod
+     cluster across the floor so the detailed pods sit in an endless hall ----- */
+  const far = new THREE.Group();
+  const farBodyM = mat(0x0d0e10, 0.6, 0.6);
+  const farGlowM = new THREE.MeshBasicMaterial({ color: GREEN, transparent: true, opacity: 0.35 });
+  const clusterPitchZ = 2 * podC + HOT + COLD;      // pod pair + shared aisles
+  const clusterPitchX = rowLen + 2.4;
+  for (let gx = -1; gx <= 1; gx++) {
+    for (let gz = -2; gz <= 2; gz++) {
+      if (gx === 0 && gz === 0) continue;           // the detailed pods live here
+      for (const row of rows) {
+        const body = box(rowLen, RH, RD, farBodyM, gx * clusterPitchX, RH / 2, gz * clusterPitchZ + row.z);
+        far.add(body);
+        const strip = box(rowLen * 0.96, 0.1, 0.01, farGlowM,
+          gx * clusterPitchX, RH * 0.5,
+          gz * clusterPitchZ + row.z + (row.faceNeg ? -RD / 2 - 0.01 : RD / 2 + 0.01));
+        far.add(strip);
+      }
+    }
+  }
+  far.traverse(o => { if (o.isMesh) noHi.add(o.id); });
+  root.add(far);
+
   /* ----- floor: dark slab + grid + perforated cold-aisle tiles ----- */
   const floor = new THREE.Mesh(new THREE.PlaneGeometry(46, 46), mat(0x0a0c0d, 0.9, 0.15));
   floor.rotation.x = -Math.PI / 2;
@@ -213,7 +237,7 @@ export function buildDatacenter() {
 
   return {
     group: root,
-    camera: { pos: [-6.6, 6.2, 7.6], target: [0.5, 0.5, 0], min: 3, max: 30 },
+    camera: { pos: [-6.6, 6.2, 7.6], target: [0.5, 0.5, 0], min: 3, max: 42 },
     defaultInfo: 'datacenter',
   };
 }

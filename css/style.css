@@ -38,7 +38,13 @@ html, body {
   pointer-events: none;
   z-index: 10;
 }
-.brand { display: flex; align-items: center; gap: 12px; }
+.brand { display: flex; flex-direction: column; }
+.brand .unofficial {
+  font-size: 0.68rem;
+  color: var(--text-dim);
+  letter-spacing: 0.02em;
+  margin-top: 2px;
+}
 .brand h1 {
   font-size: 1.55rem;
   font-weight: 700;

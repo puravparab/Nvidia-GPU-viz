@@ -11,28 +11,25 @@ function graceDieTexture() {
   ctx.fillRect(0, 0, 512, 448);
   let s = 41;
   const rand = () => (s = (s * 16807) % 2147483647) / 2147483647;
-  // 9 x 8 mesh of core tiles
+  // 9 x 8 mesh of core tiles — orange cores + green L3 slices with grey
+  // coherency-fabric nodes, per NVIDIA's Grace die diagram
   const cols = 9, rows = 8, gw = 512 / cols, gh = 448 / rows;
   for (let i = 0; i < cols; i++) {
     for (let j = 0; j < rows; j++) {
-      // central band = fabric / L3
-      const isFabric = j === 3 || j === 4;
-      const base = isFabric ? 26 : 20 + Math.floor(rand() * 8);
-      ctx.fillStyle = isFabric
-        ? `rgb(${base + 8},${base + 14},${base + 26})`
-        : `rgb(${base},${base + 6},${base + 16})`;
-      ctx.fillRect(i * gw + 2, j * gh + 2, gw - 4, gh - 4);
-      if (!isFabric) {
-        // identical sub-structure in every core tile (cores are copies)
-        ctx.fillStyle = 'rgba(90,110,150,0.35)';
-        ctx.fillRect(i * gw + 6, j * gh + 6, gw * 0.4, gh * 0.35);
-        ctx.fillRect(i * gw + gw * 0.55, j * gh + gh * 0.5, gw * 0.3, gh * 0.35);
-      }
+      const isCore = (i + j) % 2 === 0;
+      ctx.fillStyle = isCore
+        ? `rgb(${150 + Math.floor(rand() * 30)},${92 + Math.floor(rand() * 16)},20)`
+        : `rgb(${52 + Math.floor(rand() * 14)},${112 + Math.floor(rand() * 22)},34)`;
+      ctx.fillRect(i * gw + 4, j * gh + 4, gw - 8, gh - 8);
+      // fabric node at each tile corner
+      ctx.fillStyle = 'rgb(96,100,104)';
+      ctx.fillRect(i * gw - 4, j * gh - 4, 9, 9);
     }
   }
-  ctx.globalAlpha = 0.3;
-  ctx.strokeStyle = '#3a4a66';
-  for (let x = 0; x < 512; x += 8) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 448); ctx.stroke(); }
+  ctx.globalAlpha = 0.35;
+  ctx.strokeStyle = '#7a6a3a';
+  for (let x = 0; x < 512; x += Math.floor(gw)) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, 448); ctx.stroke(); }
+  for (let y = 0; y < 448; y += Math.floor(gh)) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(512, y); ctx.stroke(); }
   ctx.globalAlpha = 1;
   const tex = new THREE.CanvasTexture(cv);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -60,8 +57,8 @@ export function buildGrace() {
   /* ----- monolithic compute die ----- */
   const tex = graceDieTexture();
   const dieM = new THREE.MeshStandardMaterial({
-    map: tex, roughness: 0.28, metalness: 0.8,
-    emissive: 0x2a3550, emissiveIntensity: 0.28, emissiveMap: tex,
+    map: tex, roughness: 0.28, metalness: 0.75,
+    emissive: 0xffffff, emissiveIntensity: 0.14, emissiveMap: tex,
   });
   const die = box(0.62, 0.022, 0.52, dieM, 0, 0.051, -0.03);
   mark(die, 'graceDie');
@@ -72,8 +69,8 @@ export function buildGrace() {
   const c2c = box(0.62, 0.023, 0.035, glowMat(GREEN, 0.85), 0, 0.051, 0.25);
   mark(c2c, 'graceC2cPhy');
   root.add(c2c);
-  // LPDDR5X controllers/PHY along both side edges
-  const phyM = mat(0x28405e, 0.35, 0.8, { emissive: 0x14304f, emissiveIntensity: 0.22 });
+  // LPDDR5X controllers/PHY along both side edges (cyan in NVIDIA's diagram)
+  const phyM = mat(0x2a7f8c, 0.35, 0.7, { emissive: 0x14444e, emissiveIntensity: 0.25 });
   for (const sx of [-1, 1]) {
     const p = box(0.03, 0.023, 0.52, phyM, sx * 0.335, 0.051, -0.03);
     mark(p, 'graceMemPhy');

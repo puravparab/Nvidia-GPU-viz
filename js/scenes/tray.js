@@ -14,9 +14,10 @@ export function buildTray() {
   const root = new THREE.Group();
   const W = 0.537, D = 0.9, WALL = 0.05;
 
-  // teal anodised GPU cold plates + grey Grace plate, per the GTC tray photo
-  const tealPlate = mat(0x1f6a70, 0.38, 0.7);
-  const tealRidge = mat(0x27787e, 0.35, 0.75);
+  // copper liquid cold plates + grey Grace plate, per NVIDIA's labelled
+  // compute-tray cutaway ("Liquid Cooling Inlet/Outlet" display board)
+  const copperPlate = mat(0x86471f, 0.28, 1.0);
+  const copperRidge = mat(0x9d5a28, 0.26, 1.0);
   const darkPlate = mat(0x3a3f45, 0.4, 0.8);
   const labelM = mat(0x9aa0a6, 0.35, 0.85);          // small spec label on each plate
   const pcbM = mat(0x101214, 0.55, 0.35);            // near-black board
@@ -45,14 +46,34 @@ export function buildTray() {
     // --- two Blackwell GPUs under dark cold plates: rear row (4 across tray) ---
     for (const gx of [-0.06, 0.06]) {
       const plate = new THREE.Group();
-      plate.add(slab(0.105, 0.02, 0.115, 0.008, tealPlate, gx, 0.004, -0.19));
+      plate.add(slab(0.105, 0.02, 0.115, 0.008, copperPlate, gx, 0.004, -0.19));
       for (let i = 0; i < 3; i++) {
-        plate.add(box(0.085, 0.003, 0.016, tealRidge, gx, 0.025, -0.23 + i * 0.038));
+        plate.add(box(0.085, 0.003, 0.016, copperRidge, gx, 0.025, -0.23 + i * 0.038));
       }
-      // pale spec label square (visible in the photo)
-      plate.add(box(0.034, 0.002, 0.026, labelM, gx, 0.0255, -0.185));
       mark(plate, 'gpuColdplate');
       b.add(plate);
+    }
+    // black "GB200" badge bar across the pair of GPU plates (cutaway photo)
+    {
+      const cv = document.createElement('canvas');
+      cv.width = 256; cv.height = 48;
+      const ctx = cv.getContext('2d');
+      ctx.fillStyle = '#0b0c0d';
+      ctx.fillRect(0, 0, 256, 48);
+      ctx.fillStyle = 'rgba(235,238,240,0.92)';
+      ctx.font = '600 30px system-ui, sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('GB200', 128, 34);
+      const badgeTex = new THREE.CanvasTexture(cv);
+      badgeTex.colorSpace = THREE.SRGBColorSpace;
+      b.add(box(0.19, 0.006, 0.034, mat(0x0b0c0d, 0.5, 0.4), 0, 0.026, -0.135));
+      const face = new THREE.Mesh(
+        new THREE.PlaneGeometry(0.19, 0.034),
+        new THREE.MeshBasicMaterial({ map: badgeTex, transparent: false })
+      );
+      face.rotation.x = -Math.PI / 2;
+      face.position.set(0, 0.0295, -0.135);
+      b.add(face);
     }
 
     // --- Grace CPU under its own dark plate, centre of the board, mid-depth ---
