@@ -1,8 +1,8 @@
 import * as THREE from 'three';
 import { OrbitControls } from '../vendor/OrbitControls.js';
 import { RoomEnvironment } from '../vendor/RoomEnvironment.js';
-import { INFO, LEVELS } from './data.js?v=20260710-12';
-import { TOUR } from './tour.js?v=20260710-12';
+import { INFO, LEVELS } from './data.js?v=20260712-1';
+import { TOUR, TOUR_VR } from './tour.js?v=20260712-1';
 import { GREEN } from './common.js';
 import { buildRack } from './scenes/rack.js';
 import { buildTray } from './scenes/tray.js';
@@ -13,25 +13,63 @@ import { buildGrace } from './scenes/grace.js';
 import { buildNvswitch } from './scenes/nvswitch.js';
 import { buildHbm } from './scenes/hbm.js';
 import { buildDatacenter } from './scenes/datacenter.js?v=20260710-13';
+import { buildVrRack } from './scenes/vr/rack.js';
+import { buildVrTray } from './scenes/vr/tray.js';
+import { buildVrBoard } from './scenes/vr/board.js';
+import { buildVrChip } from './scenes/vr/chip.js';
+import { buildVrVera } from './scenes/vr/vera.js';
+import { buildVrSwitchtray } from './scenes/vr/switchtray.js';
+import { buildVrNvswitch } from './scenes/vr/nvswitch.js';
+import { buildVrHbm } from './scenes/vr/hbm.js';
 
 const BUILDERS = {
   datacenter: buildDatacenter,
   rack: buildRack, tray: buildTray, board: buildBoard, chip: buildChip,
   switchtray: buildSwitchTray, grace: buildGrace, nvswitch: buildNvswitch, hbm: buildHbm,
+  vrRack: buildVrRack, vrTray: buildVrTray, vrBoard: buildVrBoard, vrChip: buildVrChip,
+  vrVera: buildVrVera, vrSwitchtray: buildVrSwitchtray, vrNvswitch: buildVrNvswitch, vrHbm: buildVrHbm,
 };
-// levels form a tree: main spine datacenter→rack→tray→board→chip→hbm, with side
-// branches rack→switchtray→nvswitch and board→grace
+// Two systems share the app: GB200 levels keep their original names, Vera
+// Rubin levels are prefixed `vr`. Each system is a disjoint level tree.
+// GB200 spine: datacenter→rack→tray→board→chip→hbm, branches rack→switchtray
+// →nvswitch and board→grace. VR spine: vrRack→vrTray→vrBoard→vrChip→vrHbm,
+// branches vrRack→vrSwitchtray→vrNvswitch and vrBoard→vrVera.
 const PARENT = {
   datacenter: null, rack: 'datacenter', tray: 'rack', switchtray: 'rack', board: 'tray',
   chip: 'board', grace: 'board', nvswitch: 'switchtray', hbm: 'chip',
+  vrRack: null, vrTray: 'vrRack', vrSwitchtray: 'vrRack', vrBoard: 'vrTray',
+  vrChip: 'vrBoard', vrVera: 'vrBoard', vrNvswitch: 'vrSwitchtray', vrHbm: 'vrChip',
 };
 const PRIMARY_CHILD = {
   datacenter: 'rack', rack: 'tray', tray: 'board', board: 'chip', chip: 'hbm', switchtray: 'nvswitch',
+  vrRack: 'vrTray', vrTray: 'vrBoard', vrBoard: 'vrChip', vrChip: 'vrHbm', vrSwitchtray: 'vrNvswitch',
 };
 const CRUMB_LABELS = {
   datacenter: 'AI Factory', rack: 'Rack', tray: 'Compute Tray', board: 'GB200 Superchip', chip: 'Blackwell GPU',
   hbm: 'HBM3e', switchtray: 'Switch Tray', nvswitch: 'NVSwitch', grace: 'Grace CPU',
+  vrRack: 'Rack', vrTray: 'Compute Tray', vrBoard: 'Strata Module', vrChip: 'Rubin GPU',
+  vrHbm: 'HBM4', vrSwitchtray: 'Switch Tray', vrNvswitch: 'NVSwitch 6', vrVera: 'Vera CPU',
 };
+
+/* ---------------- system switcher (header title dropdown) ---------------- */
+const SYSTEMS = {
+  gb200: {
+    root: 'rack',
+    html: 'NVIDIA GB200 <span>NVL72</span>',
+    doc: 'NVIDIA GB200 NVL72 — Interactive 3D Explorer',
+  },
+  vr: {
+    root: 'vrRack',
+    html: 'NVIDIA VERA RUBIN <span>NVL72</span>',
+    doc: 'NVIDIA Vera Rubin NVL72 — Interactive 3D Explorer',
+  },
+};
+const systemOf = level => (level.startsWith('vr') ? 'vr' : 'gb200');
+// shareable hash for a level; the VR root gets the short '#vr'
+const levelHash = level =>
+  level === 'rack' ? '' : (level === 'vrRack' ? 'vr' : level);
+const hashLevel = hash =>
+  hash === '' ? 'rack' : (hash === 'vr' ? 'vrRack' : hash);
 
 /* ---------------- renderer / scene ---------------- */
 const canvas = document.getElementById('scene');
@@ -46,6 +84,8 @@ const PORTRAIT_VIEW_SCALE = {
   datacenter: 1.25, rack: 1.12,
   tray: 1.85, switchtray: 1.85, board: 1.85,
   chip: 2.0, grace: 1.8, nvswitch: 1.8, hbm: 1.7,
+  vrRack: 1.12, vrTray: 1.85, vrSwitchtray: 1.85, vrBoard: 1.85,
+  vrChip: 2.0, vrVera: 1.8, vrNvswitch: 1.8, vrHbm: 1.7,
 };
 const responsiveViewScale = (level = 'rack') => {
   if (window.innerWidth > 700) return 1;
@@ -147,7 +187,7 @@ function setLevel(level, { instant = false, panelKey = null, cam = null } = {}) 
     controls.update(0);
 
     // grounded scenes use fog for depth; close-up scenes float in the void
-    scene.fog.density = { rack: 0.018, datacenter: 0.012 }[level] ?? 0.0;
+    scene.fog.density = { rack: 0.018, vrRack: 0.018, datacenter: 0.012 }[level] ?? 0.0;
 
     // widen shadow coverage for the big datacenter scene, tight for close-ups
     const shadowExtent = level === 'datacenter' ? 12 : 3;
@@ -158,10 +198,12 @@ function setLevel(level, { instant = false, panelKey = null, cam = null } = {}) 
     key.shadow.camera.updateProjectionMatrix();
 
     renderBreadcrumb();
+    updateSystemUI();
     showPanel(panelKey ?? current.defaultInfo, { auto: true });
     // shareable deep link (skip during the tour; it has its own flow)
     if (tourIdx < 0) {
-      history.replaceState(null, '', level === 'rack' ? location.pathname + location.search : '#' + level);
+      const h = levelHash(level);
+      history.replaceState(null, '', h ? '#' + h : location.pathname + location.search);
     }
   };
 
@@ -196,6 +238,40 @@ function renderBreadcrumb() {
   }
 }
 
+/* header title doubles as the system picker */
+const sysBtn = document.getElementById('sys-btn');
+const sysTitle = document.getElementById('sys-title');
+const sysMenu = document.getElementById('sys-menu');
+
+function updateSystemUI() {
+  const sys = systemOf(currentLevel);
+  sysTitle.innerHTML = SYSTEMS[sys].html;
+  document.title = SYSTEMS[sys].doc;
+  sysMenu.querySelectorAll('.sys-opt').forEach(o => {
+    o.classList.toggle('active', o.dataset.sys === sys);
+  });
+}
+function closeSysMenu() {
+  sysMenu.classList.add('hidden');
+  sysBtn.setAttribute('aria-expanded', 'false');
+}
+sysBtn.addEventListener('click', e => {
+  e.stopPropagation();
+  const open = sysMenu.classList.toggle('hidden');
+  sysBtn.setAttribute('aria-expanded', String(!open));
+});
+sysMenu.addEventListener('click', e => {
+  const opt = e.target.closest('.sys-opt');
+  if (!opt) return;
+  closeSysMenu();
+  if (opt.dataset.sys === systemOf(currentLevel)) return;
+  if (tourIdx >= 0) endTour();
+  setLevel(SYSTEMS[opt.dataset.sys].root);
+});
+window.addEventListener('pointerdown', e => {
+  if (!sysMenu.classList.contains('hidden') && !e.target.closest('.brand')) closeSysMenu();
+});
+
 /* ---------------- camera fly-to ---------------- */
 let camTween = null;
 function flyTo(pos, target, dur = 1.15) {
@@ -211,6 +287,7 @@ const easeInOut = k => (k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 
 
 /* ---------------- guided tour ---------------- */
 let tourIdx = -1;
+let activeTour = TOUR; // chosen per system when the tour starts
 const tourBtn = document.getElementById('tour-btn');
 const tourBar = document.getElementById('tour-bar');
 const tourStepEl = document.getElementById('tour-step');
@@ -219,6 +296,7 @@ const tourPrev = document.getElementById('tour-prev');
 const tourNext = document.getElementById('tour-next');
 
 function startTour() {
+  activeTour = systemOf(currentLevel) === 'vr' ? TOUR_VR : TOUR;
   document.body.classList.add('touring');
   tourBar.classList.remove('hidden');
   tourBtn.classList.add('hidden');
@@ -233,13 +311,13 @@ function endTour() {
   tourBtn.classList.remove('hidden');
 }
 function gotoStop(i) {
-  if (i < 0 || i >= TOUR.length) { endTour(); return; }
+  if (i < 0 || i >= activeTour.length) { endTour(); return; }
   tourIdx = i;
-  const s = TOUR[i];
-  tourStepEl.textContent = `STOP ${i + 1} OF ${TOUR.length}`;
+  const s = activeTour[i];
+  tourStepEl.textContent = `STOP ${i + 1} OF ${activeTour.length}`;
   tourTextEl.textContent = s.text;
   tourPrev.disabled = i === 0;
-  tourNext.textContent = i === TOUR.length - 1 ? 'Finish ✓' : 'Next ›';
+  tourNext.textContent = i === activeTour.length - 1 ? 'Finish ✓' : 'Next ›';
   if (s.level !== currentLevel) {
     // cross-level: fade, then start at the stop's viewpoint
     setLevel(s.level, { panelKey: s.info, cam: s });
@@ -445,11 +523,11 @@ window.addEventListener('resize', () => {
   if (prefersReducedMotion.matches || isNarrowViewport()) controls.autoRotate = false;
 });
 
-// deep link support: /#grace, /#hbm, /#switchtray, ...
-const startLevel = BUILDERS[location.hash.slice(1)] ? location.hash.slice(1) : 'rack';
-setLevel(startLevel, { instant: true });
+// deep link support: /#grace, /#hbm, /#vr, /#vrTray, ...
+const requested = hashLevel(location.hash.slice(1));
+setLevel(BUILDERS[requested] ? requested : 'rack', { instant: true });
 window.addEventListener('hashchange', () => {
-  const l = location.hash.slice(1) || 'rack';
+  const l = hashLevel(location.hash.slice(1));
   if (BUILDERS[l] && l !== currentLevel && tourIdx < 0) setLevel(l);
 });
 

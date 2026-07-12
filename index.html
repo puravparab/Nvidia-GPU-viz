@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <title>NVIDIA GB200 NVL72 — Interactive 3D Explorer</title>
-<meta name="description" content="Explore NVIDIA's GB200 NVL72 rack-scale AI system in interactive 3D — from the 120 kW rack down to the Blackwell GPU silicon. Every component is clickable with real specs, plus a guided tour." />
+<meta name="description" content="Explore NVIDIA's GB200 NVL72 and Vera Rubin NVL72 rack-scale AI systems in interactive 3D — from the rack down to the GPU silicon. Every component is clickable with real specs, plus guided tours." />
 <meta name="theme-color" content="#76b900" />
 <link rel="canonical" href="https://nvidia-gpu-viz.pages.dev/" />
 
@@ -27,7 +27,7 @@
 <meta name="twitter:image:alt" content="3D render of the NVIDIA GB200 NVL72 server rack with glowing NVLink switch trays" />
 <meta name="twitter:creator" content="@notpurav" />
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%2376b900'/%3E%3C/svg%3E" />
-<link rel="stylesheet" href="css/style.css?v=20260710-9" />
+<link rel="stylesheet" href="css/style.css?v=20260712-1" />
 <script type="importmap">
 {
   "imports": {
@@ -41,7 +41,14 @@
 
 <header id="header">
   <div class="brand">
-    <h1>NVIDIA GB200 <span>NVL72</span></h1>
+    <button id="sys-btn" aria-haspopup="listbox" aria-expanded="false" title="Switch system">
+      <h1 id="sys-title">NVIDIA GB200 <span>NVL72</span></h1>
+      <span class="sys-caret" aria-hidden="true">▾</span>
+    </button>
+    <div id="sys-menu" class="hidden" role="listbox" aria-label="Choose a system">
+      <button class="sys-opt active" data-sys="gb200" role="option">GB200 NVL72<small>Blackwell · Oberon gen 1</small></button>
+      <button class="sys-opt" data-sys="vr" role="option">Vera Rubin NVL72<small>Rubin · Oberon gen 2</small></button>
+    </div>
   </div>
 </header>
 
@@ -93,6 +100,6 @@
 
 <div id="fade"></div>
 
-<script type="module" src="js/main.js?v=20260710-12"></script>
+<script type="module" src="js/main.js?v=20260712-1"></script>
 </body>
 </html>

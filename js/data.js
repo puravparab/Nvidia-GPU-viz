@@ -1,6 +1,9 @@
 // Component database for the GB200 NVL72 explorer.
 // Every clickable object in the 3D scenes carries an `infoKey` that points here.
 // `drill` marks components that can be zoomed into (a deeper scene level).
+// Vera Rubin NVL72 entries live in data-vr.js and are merged in at the bottom.
+
+import { INFO_VR, LEVELS_VR } from './data-vr.js';
 
 export const LEVELS = {
   datacenter: { title: 'AI Factory' },
@@ -603,3 +606,6 @@ export const INFO = {
     ],
   },
 };
+
+Object.assign(LEVELS, LEVELS_VR);
+Object.assign(INFO, INFO_VR);

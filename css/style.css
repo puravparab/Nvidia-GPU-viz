@@ -38,13 +38,74 @@ html, body {
   pointer-events: none;
   z-index: 10;
 }
-.brand { display: flex; flex-direction: column; }
+.brand { display: flex; flex-direction: column; position: relative; pointer-events: auto; }
 .brand h1 {
   font-size: 1.55rem;
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 .brand h1 span { color: var(--green); font-weight: 300; }
+
+/* the title is a button: click to switch between GB200 and Vera Rubin */
+#sys-btn {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+}
+.sys-caret {
+  color: var(--green);
+  font-size: 0.85rem;
+  opacity: 0.8;
+  transition: transform 0.15s ease;
+}
+#sys-btn[aria-expanded="true"] .sys-caret { transform: rotate(180deg); }
+#sys-menu {
+  position: absolute;
+  top: calc(100% + 9px);
+  left: 0;
+  z-index: 30;
+  min-width: 235px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--panel);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 10px;
+  backdrop-filter: blur(8px);
+}
+#sys-menu.hidden { display: none; }
+.sys-opt {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 9px 11px;
+  background: none;
+  border: 0;
+  border-radius: 7px;
+  cursor: pointer;
+  color: var(--text);
+  font: inherit;
+  font-size: 0.92rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-align: left;
+}
+.sys-opt small {
+  color: var(--text-dim);
+  font-size: 0.72rem;
+  font-weight: 400;
+}
+.sys-opt:hover { background: rgba(255,255,255,0.06); }
+.sys-opt.active { color: var(--green); }
+.sys-opt.active small { color: var(--green-dim); }
 /* ---------- breadcrumb ---------- */
 #breadcrumb {
   position: fixed;

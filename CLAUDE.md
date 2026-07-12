@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A browser-based 3D visualization of NVIDIA's GB200 NVL72 rack-scale AI system, built directly on Three.js (r169, vendored). No framework, no build step, no package manager — everything is static ES modules loaded via an import map in `index.html`.
+A browser-based 3D visualization of NVIDIA's rack-scale AI systems — GB200 NVL72 and Vera Rubin NVL72, switchable via the header-title dropdown — built directly on Three.js (r169, vendored). No framework, no build step, no package manager — everything is static ES modules loaded via an import map in `index.html`.
 
 ## Running
 
@@ -18,7 +18,12 @@ Then open http://localhost:8000. There is no build, lint, or test tooling — ed
 
 ## Architecture
 
-The app renders one "level" at a time from a stack of four nested zoom levels: **rack → tray → board → chip**. Each level is an independent Three.js scene graph.
+The app renders one "level" at a time. Levels form two disjoint trees, one per system, defined by the `PARENT`/`PRIMARY_CHILD` maps in `main.js`:
+
+- **GB200**: datacenter → rack → tray → board → chip → hbm, with branches rack → switchtray → nvswitch and board → grace.
+- **Vera Rubin** (levels prefixed `vr`, scenes under `js/scenes/vr/`, INFO entries in `js/data-vr.js`): vrRack → vrTray → vrBoard → vrChip → vrHbm, with branches vrRack → vrSwitchtray → vrNvswitch and vrBoard → vrVera.
+
+A level's system is determined by its name prefix (`systemOf` in `main.js`); the header title dropdown jumps between the two roots. Each level is an independent Three.js scene graph.
 
 - **`js/main.js`** owns the singleton renderer, camera, `OrbitControls`, lights, and the environment map. It is the only place that touches WebGL. It handles level switching, raycaster-based picking (hover highlight + click-to-inspect + double-click-to-drill), and the info panel. Built scenes are cached in `cache[level]` after first build.
 
